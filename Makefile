@@ -5,7 +5,7 @@ ENTR = entr
 ENTR_FLAGS = -c
 NEED_ENTR = "'make watch' requires entr to be installed."
 
-PYTEST = pytest
+PYTEST = python -m pytest
 PYTEST_FLAGS = -s
 
 watch:
