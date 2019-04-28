@@ -22,6 +22,8 @@ class Flux:
 
                 yield _next
 
+            return
+
         return flow()
 
     def wind( self, f ):

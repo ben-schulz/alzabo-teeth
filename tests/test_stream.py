@@ -46,6 +46,9 @@ def test__iter__produces_stop_iteration_on_no_more_data():
 
     try:
         next( flow )
+
     except StopIteration:
         pass
-    
+        return
+
+    assert False, "expected 'StopIteration raised."
