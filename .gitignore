@@ -1,3 +1,6 @@
+# assume notebooks are scratch work only
+*.ipynb
+
 # Byte-compiled / optimized / DLL files
 __pycache__/
 *.py[cod]
