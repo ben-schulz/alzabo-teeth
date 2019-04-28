@@ -6,4 +6,23 @@ class Flux:
         self.steps = []
 
     def __iter__( self ):
-        return iter( self.data )
+
+        _iter = iter( self.data )
+
+        def flow():
+
+            while True:
+                try:
+                    _next = next( _iter )
+                except StopIteration:
+                    break
+
+                for f in self.steps:
+                    _next = f( _next )
+
+                yield _next
+
+        return flow()
+
+    def wind( self, f ):
+        self.steps.append( f )
