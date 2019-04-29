@@ -52,3 +52,37 @@ def test__iter__produces_stop_iteration_on_no_more_data():
         return
 
     assert False, "expected 'StopIteration raised."
+
+
+def test__wind__applies_multiple_subsequent_transformation():
+
+    f = Flux( "abcdabcd" )
+
+    def upper( x ):
+        return x.upper()
+
+    def replace( target, replacement ):
+
+        def _replace( x ):
+            if x == target:
+                return replacement
+            else:
+                return x
+
+        return _replace
+
+    f.wind( replace( 'd', '-' ) )
+    f.wind( upper )
+    f.wind( replace( '-', 'e' ) )
+
+    flow = iter( f )
+
+    result = []
+
+    while True:
+        try:
+            result.append( next( flow ) )
+        except StopIteration:
+            break
+
+    assert result == list( 'ABCeABCe' )
