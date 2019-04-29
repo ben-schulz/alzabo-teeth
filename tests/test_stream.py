@@ -1,5 +1,22 @@
 from teeth.stream import Flux
 
+def upper( x ):
+    return x.upper()
+
+def lower( x ):
+    return x.lower()
+
+def replace( target, replacement ):
+
+    def _replace( x ):
+        if x == target:
+            return replacement
+        else:
+            return x
+
+    return _replace
+
+
 def test__empty__is_a_plain_iterable():
 
     f = iter( Flux( "the cat sat on the mat." ) )
@@ -15,10 +32,7 @@ def test__wind__applies_a_transformation():
 
     f = Flux( "the cat sat on the mat." )
 
-    def lower( x ):
-        return x.upper()
-
-    f.wind( lower )
+    f.wind( upper )
 
     flow = iter( f )
 
@@ -33,10 +47,7 @@ def test__iter__produces_stop_iteration_on_no_more_data():
 
     f = Flux( "the" )
 
-    def lower( x ):
-        return x.upper()
-
-    f.wind( lower )
+    f.wind( upper )
 
     flow = iter( f )
 
@@ -57,19 +68,6 @@ def test__iter__produces_stop_iteration_on_no_more_data():
 def test__wind__applies_multiple_subsequent_transformation():
 
     f = Flux( "abcdabcd" )
-
-    def upper( x ):
-        return x.upper()
-
-    def replace( target, replacement ):
-
-        def _replace( x ):
-            if x == target:
-                return replacement
-            else:
-                return x
-
-        return _replace
 
     f.wind( replace( 'd', '-' ) )
     f.wind( upper )
