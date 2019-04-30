@@ -19,7 +19,7 @@ def replace( target, replacement ):
 
 def test__empty__is_a_plain_iterable():
 
-    f = iter( Flux( "the cat sat on the mat." ) )
+    f = iter( Flux( 'the cat sat on the mat.' ) )
 
     first = next( f )
     second = next( f )
@@ -30,7 +30,7 @@ def test__empty__is_a_plain_iterable():
 
 def test__wind__applies_a_transformation():
 
-    f = Flux( "the cat sat on the mat." )
+    f = Flux( 'the cat sat on the mat.' )
 
     f.wind( upper )
 
@@ -45,7 +45,7 @@ def test__wind__applies_a_transformation():
 
 def test__iter__produces_stop_iteration_on_no_more_data():
 
-    f = Flux( "the" )
+    f = Flux( 'the' )
 
     f.wind( upper )
 
@@ -62,12 +62,12 @@ def test__iter__produces_stop_iteration_on_no_more_data():
         pass
         return
 
-    assert False, "expected 'StopIteration raised."
+    assert False, 'expected \'StopIteration\' raised.'
 
 
 def test__wind__applies_multiple_subsequent_transformation():
 
-    f = Flux( "abcdabcd" )
+    f = Flux( 'abcdabcd' )
 
     f.wind( replace( 'd', '-' ) )
     f.wind( upper )
@@ -84,3 +84,35 @@ def test__wind__applies_multiple_subsequent_transformation():
             break
 
     assert result == list( 'ABCeABCe' )
+
+def test__unwind__removes_the_last_applied_transform():
+
+    f = Flux( 'abcdabcd' )
+
+    f.wind( replace( 'd', '-' ) )
+    f.wind( upper )
+    f.wind( replace( '-', 'e' ) )
+
+    f.unwind()
+
+    flow = iter( f )
+
+    result = []
+
+    while True:
+        try:
+            result.append( next( flow ) )
+        except StopIteration:
+            break
+
+    assert result == list( 'ABC-ABC-' )
+
+def test__getitem__return_slice_with_transforms():
+
+    f = Flux( 'the cat sat on the mat.' )
+
+    f.wind( upper )
+
+    result = f[ 4:11 ]
+
+    assert result == 'CAT SAT'

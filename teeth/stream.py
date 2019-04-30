@@ -5,9 +5,25 @@ class Flux:
         self.data = data
         self.steps = []
 
-    def __iter__( self ):
 
-        _iter = iter( self.data )
+    def __getitem__( self, s ):
+
+        d = self.data[ s ]
+        s = list( self._makeiter( d ) )
+
+        if isinstance( d, str ):
+            return str.join( '',  s)
+        else:
+            return s
+
+
+    def __iter__( self ):
+        return self._makeiter( self.data )
+
+
+    def _makeiter( self, data ):
+
+        _iter = iter( data )
 
         def flow():
 
@@ -28,3 +44,6 @@ class Flux:
 
     def wind( self, f ):
         self.steps.append( f )
+
+    def unwind( self ):
+        self.steps.pop()
