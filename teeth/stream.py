@@ -25,22 +25,18 @@ class Flux:
 
         _iter = iter( data )
 
-        def flow():
+        while True:
+            try:
+                _next = next( _iter )
+            except StopIteration:
+                break
 
-            while True:
-                try:
-                    _next = next( _iter )
-                except StopIteration:
-                    break
+            for f in self.steps:
+                _next = f( _next )
 
-                for f in self.steps:
-                    _next = f( _next )
+            yield _next
 
-                yield _next
-
-            return
-
-        return flow()
+        return
 
     def wind( self, f ):
         self.steps.append( f )
