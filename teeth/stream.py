@@ -44,7 +44,7 @@ class Flux:
     def items( self ):
         return [ x for x in iter( self ) ]
 
-    def compare( sl ):
+    def compare( self, sl ):
         return( self.data[ sl ], self[ sl ] )
 
     def wind( self, f ):

@@ -1,7 +1,6 @@
 from nltk.stem.snowball import EnglishStemmer
 
-def stem( tokens ):
+nltk_english_stemmer = EnglishStemmer()
 
-    stm = EnglishStemmer()
-
-    return map( stm.stem, tokens )
+def stem( token ):
+    return nltk_english_stemmer( token )

@@ -2,25 +2,7 @@ import re
 import string
 
 from teeth.stream import Flux
-
-def upper( x ):
-    return x.upper()
-
-def lower( x ):
-    return x.lower()
-
-def replace( target, replacement ):
-
-    def _replace( x ):
-        if x == target:
-            return replacement
-        else:
-            return x
-
-    return _replace
-
-def remove( target ):
-    return replace( target, '' )
+from teeth.transforms import upper, lower, replace, remove
 
 
 def test__empty__is_a_plain_iterable():
