@@ -19,3 +19,14 @@ def replace( target, replacement ):
 
 def remove( target ):
     return replace( target, '' )
+
+
+def replace_when( condition, transform ):
+
+    def _replace( x ):
+        if condition( x ):
+            return transform( x )
+        else:
+            return x
+
+    return _replace

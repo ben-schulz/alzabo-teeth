@@ -34,3 +34,10 @@ def test__punctuation__matches_typical():
 
     assert not match( 'ok' )
     assert not match( ' ' )
+
+
+def test__something():
+
+    import teeth.tokens
+    assert '\u2019' in teeth.tokens.english_punctuation
+    print( teeth.tokens.english_punctuation )
