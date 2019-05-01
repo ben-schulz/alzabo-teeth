@@ -47,6 +47,18 @@ class Flux:
     def compare( self, sl ):
         return( self.data[ sl ], self[ sl ] )
 
+    def asbytestring( self, sl ):
+
+        def _asbytes( s ):
+            return ( ':'.join( '{:02x}'.format( ord( c ) )
+                               for c in s ) )
+
+        if isinstance( self.data, str ):
+            return _asbytes( self.data[ sl ] )
+        else:
+            return [ [ _asbytes( c ) for c in x ]
+                     for x in self.data[ sl ] ]
+
     def wind( self, f ):
         self.steps.append( f )
 
