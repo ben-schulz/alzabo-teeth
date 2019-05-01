@@ -6,6 +6,9 @@ class Flux:
         self.steps = []
 
 
+    def __len__( self ):
+        return len( self.data )
+
     def __getitem__( self, s ):
 
         d = self.data[ s ]
@@ -57,15 +60,16 @@ class Flux:
 
         for x in iter( self ):
 
-            if p( x ) and 0 == len( token ):
-                result.append( x )
+            if not p( x ):
+                token.append( x )
+                continue
 
-            elif p( x ):
+            if 0 < len( token ):
                 result.append( token )
                 token = []
 
-            else:
-                token.append( x )
+            result.append( [ x ] )
+
 
         if 0 < len( token ):
             result.append( token )
@@ -74,6 +78,6 @@ class Flux:
             return str.join( '', x )
 
         if isinstance( self.data, str ):
-            return Flux( map( join, result ) )
+            return Flux( list( map( join, result ) ) )
 
         return Flux( result )
