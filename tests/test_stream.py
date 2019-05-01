@@ -59,7 +59,6 @@ def test__iter__produces_stop_iteration_on_no_more_data():
         next( flow )
 
     except StopIteration:
-        pass
         return
 
     assert False, 'expected \'StopIteration\' raised.'
@@ -107,6 +106,7 @@ def test__unwind__removes_the_last_applied_transform():
 
     assert result == list( 'ABC-ABC-' )
 
+
 def test__getitem__return_slice_with_transforms():
 
     f = Flux( 'the cat sat on the mat.' )
@@ -116,3 +116,15 @@ def test__getitem__return_slice_with_transforms():
     result = f[ 4:11 ]
 
     assert result == 'CAT SAT'
+
+
+def test__split__returns_new_iterable_of_tokens():
+
+    f = Flux( 'the cat sat on the mat.' )
+
+    def onspace( x ):
+        return x == ' '
+
+    result = f.split( onspace ).items()
+
+    assert 'the cat sat on the mat.'.split() == result

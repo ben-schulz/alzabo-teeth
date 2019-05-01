@@ -38,8 +38,42 @@ class Flux:
 
         return
 
+    def items( self ):
+        return [ x for x in iter( self ) ]
+
+    def compare( sl ):
+        return( self.data[ sl ], self[ sl ] )
+
     def wind( self, f ):
         self.steps.append( f )
 
     def unwind( self ):
         self.steps.pop()
+
+    def split( self, p ):
+
+        result = []
+        token = []
+
+        for x in iter( self ):
+
+            if p( x ) and 0 == len( token ):
+                result.append( x )
+
+            elif p( x ):
+                result.append( token )
+                token = []
+
+            else:
+                token.append( x )
+
+        if 0 < len( token ):
+            result.append( token )
+
+        def join( x ):
+            return str.join( '', x )
+
+        if isinstance( self.data, str ):
+            return Flux( map( join, result ) )
+
+        return Flux( result )
