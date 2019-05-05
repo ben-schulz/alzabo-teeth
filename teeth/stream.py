@@ -59,6 +59,7 @@ class Flux:
             return [ [ _asbytes( c ) for c in x ]
                      for x in self.data[ sl ] ]
 
+
     def wind( self, f ):
         self.steps.append( f )
 

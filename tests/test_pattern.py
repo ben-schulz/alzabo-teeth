@@ -2,6 +2,7 @@ import re
 
 from teeth.pattern import matches
 import teeth.pattern
+import teeth.tokens
 
 def test__matches__identifies_matching_expressions():
 
@@ -37,7 +38,4 @@ def test__punctuation__matches_typical():
 
 
 def test__something():
-
-    import teeth.tokens
     assert '\u2019' in teeth.tokens.english_punctuation
-    print( teeth.tokens.english_punctuation )
