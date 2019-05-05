@@ -1,5 +1,15 @@
 import numpy
 
+def isscalar( sl ):
+
+    try:
+        start = sl.start
+    except AttributeError:
+        return True
+
+    return False
+
+
 class CharArray:
 
     def __init__( self, text, *args, **kwargs ):
@@ -37,6 +47,36 @@ class TokenSequence:
     def __init__( self, indices):
         self._indices = indices
 
+    def __len__( self ):
+        return 1 + len( self._indices )
+
+    def __getitem__( self, sl ):
+
+        if isscalar( sl ):
+
+            if 0 < sl and sl < len( self._indices ):
+                start = self._indices[ sl - 1 ]
+                end = self._indices[ sl ]
+                return slice( start, end )
+
+            elif sl == len( self._indices ):
+                return slice( self._indices[ -1 ], None )
+
+            return slice( 0, self._indices[ sl ] )
+
+
+        if 2 > len( self ):
+            return slice( None )
+
+        result = [ slice( 0, self._indices[ 0 ] ) ]
+
+        for ix in range( sl.start, sl.stop ):
+            nxt = slice( self._indices[ ix ], self._indices[ ix + 1 ] )
+            result.append( nxt )
+
+        return result
+
+
     def __iter__( self ):
 
         if 1 > len( self._indices ):
@@ -63,14 +103,24 @@ class TextStrata:
     def __len__( self ):
 
         if 0 < self.depth:
-            return len( self.top_layer ) - 1
+            return len( self.top_layer )
         
         return len( self._data )
 
 
     def __getitem__( self, sl ):
 
-        return self._data[ sl ]
+        if 1 > self.depth:
+            return self._data[ sl ]
+
+        value = self.top_layer[ sl ]
+
+        try:
+            slices = iter( value )
+        except TypeError:
+            return self._data[ value ]
+
+        return [ self._data[ s ] for s in slices ]
 
 
     @property
@@ -79,7 +129,11 @@ class TextStrata:
 
     @property
     def top_layer( self ):
-        return self._layers[ self.depth - 1 ]
+
+        if 0 < self.depth:
+            return self._layers[ self.depth - 1 ]
+
+        return [ slice( len( self._data ) ) ]
 
 
     def tokens( self ):
@@ -95,7 +149,7 @@ class TextStrata:
         layer = []
         prev_condition = p( self._data[ 0 ] )
 
-        for ix in range( 0, len( self._data ) ):
+        for ix in range( 0, len( self ) ):
 
             this_condition = p( self._data[ ix ] )
             is_boundary = prev_condition != this_condition
