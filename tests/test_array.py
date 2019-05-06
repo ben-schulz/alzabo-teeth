@@ -57,6 +57,29 @@ def test__tokensequence__getitem__returns_slices():
     assert slice( 6, 7 ) == seq[ 3 ]
 
 
+def test__tokensequence__getitem__admits_cross_slicing():
+
+    seq_lower = TokenSequence( [ 2, 3, 6, 7, 9, 11, 17, 20 ] )
+    seq_upper = TokenSequence( [ 2, 5 ] )
+
+    result = [ seq_lower[ sl ] for sl in seq_upper ]
+
+    assert 3 == len( result )
+
+    assert [ slice( 0, 2 ),
+             slice( 2, 3 ) ] == result[ 0 ]
+
+    assert [ slice( 3, 6 ),
+             slice( 6, 7 ),
+             slice( 7, 9 ) ] == result[ 1 ]
+
+    assert [ slice( 9, 11 ),
+             slice( 11, 17 ),
+             slice( 17, 20 ),
+             slice( 20, None ) ] == result[ 2 ]
+
+
+
 def test__textstrata__splits_on_predicate():
 
     t = TextStrata( 'ok wow neat' )
@@ -87,18 +110,20 @@ And death the great goal!"""
     t = TextStrata( text )
 
     def word_ends( x ):
-        return str.isspace( x )
+        return not str.isalpha( x )
 
     def sentence_ends( x ):
-        return '!' == x
+        return '!' == x[ 0 ]
 
     t.split_where( word_ends )
     t.split_where( sentence_ends )
 
-#    assert 6 == len( t )
+    assert 6 == len( t )
 
-    first = """Apokolips is an armed camp
-where those who live with weapons
-rule the wretches who build them"""
+    first = [ 'Apokolips', ' ', 'is', ' ', 'an', ' ', 'armed',
+              ' ', 'camp', ' ', 'where', ' ', 'those', ' ',
+              'who', ' ', 'live', ' ', 'with', ' ',  'weapons',
+              ' ', 'rule', ' ',  'the', ' ',  'wretches', ' ',
+              'who', ' ', 'build', ' ', 'them' ]
 
 #    assert first == t[ 0 ]

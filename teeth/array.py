@@ -68,13 +68,26 @@ class TokenSequence:
         if 2 > len( self ):
             return slice( None )
 
-        result = [ slice( 0, self._indices[ 0 ] ) ]
+        if 0 == sl.start:
+            results = [ slice( 0, self._indices[ sl.start ] ) ]
+        else:
+            start = self._indices[ sl.start - 1 ]
+            stop = self._indices[ sl.start ]
+            results = [ slice( start, stop ) ]
 
-        for ix in range( sl.start, sl.stop ):
-            nxt = slice( self._indices[ ix ], self._indices[ ix + 1 ] )
-            result.append( nxt )
+        ix = 0
+        indices = self._indices[ sl ]
+        result_count = len( indices ) - 1
+        while ix < result_count:
+            start = indices[ ix ]
+            stop = indices[ ix + 1 ]
+            results.append( slice( start, stop ) )
+            ix += 1
 
-        return result
+        if sl.stop is None:
+            results.append( slice( indices[ ix ], None ) )
+
+        return results
 
 
     def __iter__( self ):
@@ -113,12 +126,16 @@ class TextStrata:
         if 1 > self.depth:
             return self._data[ sl ]
 
-        value = self.top_layer[ sl ]
+        depth = self.depth - 1
+        _slice = self._layers[ depth ][ sl ]
+        layers = []
+        while 0 < depth:
+            depth -= 1
 
         try:
-            slices = iter( value )
+            slices = iter( _slice )
         except TypeError:
-            return self._data[ value ]
+            return self._data[ _slice ]
 
         return [ self._data[ s ] for s in slices ]
 
@@ -147,11 +164,11 @@ class TextStrata:
     def split_where( self, p ):
 
         layer = []
-        prev_condition = p( self._data[ 0 ] )
+        prev_condition = p( self[ 0 ] )
 
         for ix in range( 0, len( self ) ):
 
-            this_condition = p( self._data[ ix ] )
+            this_condition = p( self[ ix ] )
             is_boundary = prev_condition != this_condition
 
             if is_boundary:
