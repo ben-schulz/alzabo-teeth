@@ -1,4 +1,5 @@
 from teeth.array import CharArray, TextStrata, TokenSequence
+from teeth.array import Strata
 from teeth.array import isscalar
 
 def test__isscalar__detects_slice_structure():
@@ -20,6 +21,50 @@ def test__chararray__getitem__returns_slice():
 
     assert 'wow k' == a[ slice( -1, -6, -1 ) ]
     assert 'k wo' == a[ slice( -5, -1, 1 ) ]
+
+
+def test__strata__empty__layers_returns_whole_list():
+
+    s = Strata()
+    data = 'ok wow'
+
+    assert data == s.sieve( data )
+
+
+def test__strata__applies_slices_from_single_layer():
+
+    s = Strata()
+    s.layer( [ 0, 3, 5, 10 ] )
+
+    data = '0123456789'
+
+    assert [ '012', '34', '56789' ] == s.sieve( data )
+
+
+def test__strata__slices_multiple_subsequent_layers():
+
+    s = Strata()
+
+    s.layer( [ 0, 3, 5, 10 ] )
+    s.layer( [ 0, 2, 3 ] )
+
+    data = '0123456789'
+
+    assert [ [ '012', '34' ], [ '56789' ] ] == s.sieve( data )
+
+
+def test__strata__interprets_none_as_remainder_of_iterable():
+
+    s = Strata()
+    s.layer( [ 0, 3, 5, None ] )
+
+    data = '0123456789'
+
+    assert [ '012', '34', '56789' ] == s.sieve( data )
+
+    s.layer( [ 0, 2, None ] )
+
+    assert [ [ '012', '34' ], [ '56789' ] ] == s.sieve( data )
 
 
 def test__textstrata__getitem__returns_slice_at_zero_level():
@@ -79,6 +124,21 @@ def test__tokensequence__getitem__admits_cross_slicing():
              slice( 20, None ) ] == result[ 2 ]
 
 
+def test__tokensequence__getitem__interprets_negative_indices():
+
+    seq = TokenSequence( [ 2, 5 ] )
+
+    assert slice( 5, None ) == seq[ -1 ]
+    assert slice( 2, 5 ) == seq[ -2 ]
+
+
+def test__tokensequence__getitem__indexes_single_element():
+
+    seq = TokenSequence( [ 2 ] )
+
+    assert slice( 2, None ) == seq[ -1 ]
+    assert seq[ -1 ].stop is None
+
 
 def test__textstrata__splits_on_predicate():
 
@@ -97,6 +157,46 @@ def test__textstrata__splits_on_predicate():
     assert t[ 2 ] == 'wow'
     assert t[ 3 ] == ' '
     assert t[ 4 ] == 'neat'
+
+
+def test__textstrata__adds_first_layers_manually():
+
+    t = TextStrata( 'ok wow neat. that is great.' )
+
+    t.add_layer( TokenSequence(
+        [ 2, 3, 6, 7, 12, 13, 17, 18, 20, 21 ] ) )
+
+    first = [ 'ok', ' ',  'wow', ' ', 'neat.',
+              ' ', 'that', ' ', 'is', ' ',  'great.' ]
+
+    for ix, token in enumerate( first ):
+        assert token == t.get_token( ix )
+
+    assert len( first ) == len( t.get_slice( slice( 0, None ) ) )
+
+
+def test__textstrata__adds_subsequent_layers_manually():
+
+    t = TextStrata( 'ok wow neat. that is great.' )
+
+    t.add_layer( TokenSequence(
+        [ 2, 3, 6, 7, 12, 13, 17, 18, 20, 21 ] ) )
+
+    first = [ 'ok', ' ',  'wow', ' ', 'neat.',
+              ' ', 'that', ' ', 'is', ' ',  'great.' ]
+
+    t.add_layer( TokenSequence( [ 3, 5 ] ) )
+
+    second = [ [ 'ok', ' ',  'wow' ], [ ' ', 'neat.' ],
+               [ ' ', 'that', ' ', 'is', ' ',  'great.' ] ]
+
+    foo = t.get_slice( slice( 0, 3 ) )
+
+    print( foo )
+
+###    assert second[ 0 ] == foo[ 0 ]
+#    assert second[ 1 ] == foo[ 1 ]
+#    assert second[ 2 ] == foo[ 2 ]
 
 
 def test__textstrata__layers_splits():
