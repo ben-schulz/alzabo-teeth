@@ -67,6 +67,33 @@ def test__strata__interprets_none_as_remainder_of_iterable():
     assert [ [ '012', '34' ], [ '56789' ] ] == s.sieve( data )
 
 
+def test__strata__creates_from_nested_list():
+
+    data = '0123456789abcdef'
+    s = Strata( layers=[ [ 5, 10 ] ] )
+    assert [ '56789' ] == s.sieve( data )
+
+
+def test__strata__returns_instance_restriced_to_given_slice():
+
+    data = '0123456789abcdef'
+
+    s = Strata()
+    s.layer( [ 0, 3, 5, 10, 13, 17, 23 ] )
+
+    scalar_0 = s[ 3 ]
+
+    assert [ 'abc' ] == scalar_0.sieve( data )
+
+    """
+    s.layer( [ 0, 2, 4, None ] )
+
+    scalar_1 = s[ 1 ]
+
+    assert [ '56789', 'abc' ] == scalar_1.sieve( data )
+    """
+
+
 def test__textstrata__getitem__returns_slice_at_zero_level():
 
     t = TextStrata( 'ok wow' )
@@ -192,7 +219,6 @@ def test__textstrata__adds_subsequent_layers_manually():
 
     foo = t.get_slice( slice( 0, 3 ) )
 
-    print( foo )
 
 ###    assert second[ 0 ] == foo[ 0 ]
 #    assert second[ 1 ] == foo[ 1 ]

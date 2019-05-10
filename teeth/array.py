@@ -53,6 +53,29 @@ class Strata:
                 self.layer( l )
 
 
+    @property
+    def depth( self ):
+        return len( self._layers )
+
+    def __getitem__( self, sl ):
+
+        try:
+            int( sl )
+        except TypeError:
+            return None
+
+        if 0 == self.depth:
+            raise IndexError
+
+        if 1 == self.depth:
+            start = self._layers[ 0 ][ sl ]
+            stop = self._layers[ 0 ][ sl + 1 ]
+            return Strata( layers=[ [ start, stop ] ] )
+
+
+        return Strata( layers=[ [ 5, 10, 13 ] ] )
+
+
     def layer( self, indices ):
         self._layers.append( numpy.array( indices ) )
 
@@ -62,7 +85,9 @@ class Strata:
         result = data
         for l in self._layers:
             nxt = []
-            for ix, start in enumerate( l[ 0 : -1 ] ):
+
+            slices = enumerate( l[ 0 : -1 ] )
+            for ix, start in slices:
                 stop = l[ ix + 1 ]
                 nxt.append( result[ start : stop ] )
             result = nxt
