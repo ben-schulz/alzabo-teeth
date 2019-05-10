@@ -85,13 +85,12 @@ def test__strata__returns_instance_restriced_to_given_slice():
 
     assert [ 'abc' ] == scalar_0.sieve( data )
 
-    """
     s.layer( [ 0, 2, 4, None ] )
 
     scalar_1 = s[ 1 ]
 
     assert [ '56789', 'abc' ] == scalar_1.sieve( data )
-    """
+
 
 
 def test__textstrata__getitem__returns_slice_at_zero_level():
