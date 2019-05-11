@@ -115,33 +115,31 @@ class Strata:
             raise IndexError
 
         if 1 == self.depth:
-            start = self._layers[ 0 ][ sl ]
-            stop = self._layers[ 0 ][ sl + 1 ]
-            return Strata( layers=[ [ start, stop ] ] )
+            _sl = self._layers[ 0 ][ sl ]
+            return Strata( layers=[ [ _sl.start, _sl.stop ] ] )
 
         start = sl
         stop = sl + 1
         layers=[]
 
-        for ix, l in enumerate( self._layers[ : 0 : -1 ] ):
+        for l in self._layers[ : : -1 ]:
 
-            nxt_slice = l[ start : stop + 1 ]
-            prev_layer = self._layers[ self.depth - ix - 2 ]
+            this_sl = l[ start : stop ]
+            layers.insert( 0, this_sl )
 
-            nxt = []
-            for _ix, _start in enumerate( nxt_slice[ 0 : -1 ] ):
-                _stop = nxt_slice[ _ix + 1 ] + 1
-                nxt.append( prev_layer[ _start : _stop ] )
+            start = this_sl.start
+            stop = this_sl.stop
 
-            layers.insert( 0, nxt[ 0 ] )
-            start = nxt[ 0 ]
-            stop = nxt[ -1 ]
-
-        return Strata( layers=layers )
+        return Strata( layers=layers[ 0 : -1 ] )
 
 
     def layer( self, indices ):
-        self._layers.append( numpy.array( indices ) )
+
+        if isinstance( indices, SliceArray ):
+            self._layers.append( indices )
+
+        else:
+            self._layers.append( SliceArray( indices ) )
 
 
     def sieve( self, data ):
@@ -149,11 +147,9 @@ class Strata:
         result = data
         for l in self._layers:
             nxt = []
+            for sl in l:
+                nxt.append( result[ sl ] )
 
-            slices = enumerate( l[ 0 : -1 ] )
-            for ix, start in slices:
-                stop = l[ ix + 1 ]
-                nxt.append( result[ start : stop ] )
             result = nxt
 
         return result
