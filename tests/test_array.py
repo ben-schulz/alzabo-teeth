@@ -1,5 +1,8 @@
 from teeth.array import CharArray, TextStrata, TokenSequence
+
 from teeth.array import Strata
+from teeth.array import SliceArray
+
 from teeth.array import isscalar
 
 def test__isscalar__detects_slice_structure():
@@ -21,6 +24,63 @@ def test__chararray__getitem__returns_slice():
 
     assert 'wow k' == a[ slice( -1, -6, -1 ) ]
     assert 'k wo' == a[ slice( -5, -1, 1 ) ]
+
+
+def test__slicearray__creates_iterable_of_slices():
+
+    s = SliceArray( [ 0, 2, 5 ] )
+
+    assert 2 == len( s )
+
+    _slice = iter( s )
+
+    assert slice( 0, 2 ) == next( _slice )
+    assert slice( 2, 5 ) == next( _slice )
+
+    try:
+        next( _slice )
+    except StopIteration:
+        return
+
+    raise AssertionError( 'expected \'StopIteration\' raised.' )
+
+
+def test__slicearray__indexes_by_integer():
+
+    s = SliceArray( [ 0, 2, 5, 13 ] )
+
+    assert slice( 0, 2 ) == s[ 0 ]
+    assert slice( 2, 5 ) == s[ 1 ]
+    assert slice( 5, 13 ) == s[ 2 ]
+
+    try:
+        x = s[ 3 ]
+    except IndexError:
+        return
+
+    raise AssertionError( 'expected \'IndexError\' raised' )
+
+
+def test__slicearray__indexes_by_slice():
+
+    s = SliceArray( [ 0, 2, 5, 13, 23, 29 ] )
+
+    sl0 = s[ 1 : 3 ]
+
+    assert slice( 2, 5 ) == sl0[ 0 ]
+    assert slice( 5, 13 ) == sl0[ 1 ]
+
+    sl1 = s[ 3 : ]
+
+    assert slice( 13, 23 ) == sl1[ 0 ]
+    assert slice( 23, 29 ) == sl1[ 1 ]
+
+    try:
+        x = sl1[ 2 ]
+    except IndexError:
+        return
+
+    raise AssertionError( 'expected \'IndexError\' raised.' )
 
 
 def test__strata__empty__layers_returns_whole_list():
@@ -91,6 +151,9 @@ def test__strata__returns_instance_restriced_to_given_top_index():
 
     assert [ '56789', 'abc' ] == scalar_1.sieve( data )
 
+#    s.layer( [ 1, 2 ] )
+
+#    scalar_2 = s[ 0 ]
 
 
 def test__textstrata__getitem__returns_slice_at_zero_level():

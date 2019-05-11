@@ -42,6 +42,50 @@ class CharArray:
         return len( self._data )
 
 
+class SliceArray:
+
+    def __init__( self, data ):
+        self._data = numpy.array( data )
+
+
+    def __len__( self ):
+        return len( self._data ) - 1
+
+
+    def __iter__( self ):
+        for ix in range( 0, self.__len__() ):
+            start = self._data[ ix ]
+            stop = self._data[ ix + 1 ]
+            yield slice( start, stop )
+
+
+    def __getitem__( self, k ):
+
+        def __getitem__int( k ):
+
+            if k > self.__len__():
+                raise IndexError
+
+            return slice( self._data[ k ], self._data[ k + 1 ] )
+
+
+        def __getitem__slice( start, stop ):
+
+            try:
+                _stop = stop + 1
+            except TypeError:
+                _stop = None
+
+            return SliceArray( self._data[ start : _stop ] )
+
+        try:
+            k = int( k )
+            return __getitem__int( k )
+
+        except TypeError:
+            return __getitem__slice( k.start, k.stop )
+
+
 class Strata:
 
     def __init__( self, layers=None ):
