@@ -57,6 +57,7 @@ class Strata:
     def depth( self ):
         return len( self._layers )
 
+
     def __getitem__( self, sl ):
 
         try:
@@ -72,8 +73,25 @@ class Strata:
             stop = self._layers[ 0 ][ sl + 1 ]
             return Strata( layers=[ [ start, stop ] ] )
 
+        start = sl
+        stop = sl + 1
+        layers=[]
 
-        return Strata( layers=[ [ 5, 10, 13 ] ] )
+        for ix, l in enumerate( self._layers[ : 0 : -1 ] ):
+
+            nxt_slice = l[ start : stop + 1 ]
+            prev_layer = self._layers[ self.depth - ix - 2 ]
+
+            nxt = []
+            for _ix, _start in enumerate( nxt_slice[ 0 : -1 ] ):
+                _stop = nxt_slice[ _ix + 1 ] + 1
+                nxt.append( prev_layer[ _start : _stop ] )
+
+            layers.insert( 0, nxt[ 0 ] )
+            start = nxt[ 0 ]
+            stop = nxt[ -1 ]
+
+        return Strata( layers=layers )
 
 
     def layer( self, indices ):

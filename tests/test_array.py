@@ -70,11 +70,11 @@ def test__strata__interprets_none_as_remainder_of_iterable():
 def test__strata__creates_from_nested_list():
 
     data = '0123456789abcdef'
-    s = Strata( layers=[ [ 5, 10 ] ] )
-    assert [ '56789' ] == s.sieve( data )
+    s = Strata( layers=[ [ 5, 10, 13 ] ] )
+    assert [ '56789', 'abc' ] == s.sieve( data )
 
 
-def test__strata__returns_instance_restriced_to_given_slice():
+def test__strata__returns_instance_restriced_to_given_top_index():
 
     data = '0123456789abcdef'
 
