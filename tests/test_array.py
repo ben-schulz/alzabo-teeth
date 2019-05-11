@@ -83,6 +83,14 @@ def test__slicearray__indexes_by_slice():
     raise AssertionError( 'expected \'IndexError\' raised.' )
 
 
+def test__slicearray__identifies_first_and_last_indices():
+
+    s = SliceArray( [ 5, 13, 23, 29 ] )
+
+    assert 5 == s.start
+    assert 29 == s.stop
+
+
 def test__strata__empty__layers_returns_whole_list():
 
     s = Strata()

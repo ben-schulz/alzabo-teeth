@@ -46,6 +46,8 @@ class SliceArray:
 
     def __init__( self, data ):
         self._data = numpy.array( data )
+        self.start = self._data[ 0 ]
+        self.stop = self._data[ -1 ]
 
 
     def __len__( self ):
