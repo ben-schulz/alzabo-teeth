@@ -1,15 +1,5 @@
 import numpy
 
-def isscalar( sl ):
-
-    try:
-        start = sl.start
-    except AttributeError:
-        return True
-
-    return False
-
-
 class CharArray:
 
     def __init__( self, text, *args, **kwargs ):
@@ -176,77 +166,6 @@ class Strata:
             result = nxt
 
         return result
-
-
-class TokenSequence:
-
-    def __init__( self, indices):
-        self._indices = indices
-
-    def __len__( self ):
-        return 1 + len( self._indices )
-
-    def __getitem__( self, sl ):
-
-        if isscalar( sl ):
-
-            if 0 < sl and sl < len( self._indices ):
-                start = self._indices[ sl - 1 ]
-                end = self._indices[ sl ]
-                return slice( start, end )
-
-            elif -1 == sl or len( self._indices ) == sl:
-                return slice( self._indices[ -1 ], None )
-
-            elif -1 > sl:
-                return slice( self._indices[ sl ],
-                              self._indices[ sl + 1 ] )
-
-            return slice( 0, self._indices[ sl ] )
-
-
-        if 2 > len( self ):
-            return slice( None )
-
-        if 0 == sl.start:
-            results = [ slice( 0, self._indices[ sl.start ] ) ]
-        else:
-            start = self._indices[ sl.start - 1 ]
-
-            try:
-                stop = self._indices[ sl.start ]
-            except IndexError:
-                stop = None
-            results = [ slice( start, stop ) ]
-
-        ix = 0
-        indices = self._indices[ sl ]
-        result_count = len( indices ) - 1
-        while ix < result_count:
-            start = indices[ ix ]
-            stop = indices[ ix + 1 ]
-            results.append( slice( start, stop ) )
-            ix += 1
-
-        if sl.stop is None and 0 < len( indices ):
-            results.append( slice( indices[ ix ], None ) )
-
-        return results
-
-
-    def __iter__( self ):
-
-        if 1 > len( self._indices ):
-            return
-
-        nxt = self._indices[ 0 ]
-        yield slice( 0, nxt )
-
-        for ix in self._indices[ 1 : ]:
-            yield slice( nxt, ix )
-            nxt = ix
-
-        yield( slice( nxt, None ) )
 
 
 class TextStrata:
