@@ -147,8 +147,7 @@ class Strata:
         for ix, l in enumerate( original_layers[ : 0 : -1 ] ):
 
             prev_layer = original_layers[ self.depth - ix - 1 ]
-            start_index = prev_layer.start
-            this_layer = l.shift( - start_index )
+            this_layer = l.shift( - prev_layer.start )
             relative_layers.insert( 0, this_layer )
 
         relative_layers.insert( 0, original_layers[ 0 ] )
@@ -171,26 +170,13 @@ class Strata:
 
     def sieve( self, data ):
 
-        def _sieve( depth, data ):
-
-            if self.depth == depth:
-                return data
-
-            nxt_data = [ data[ sl ]
-                         for sl in self._layers[ depth ] ]
-
-            return _sieve( depth + 1, nxt_data )
-
-        return _sieve( 0, data )
-
-        """
         result = data
         for l in self._layers:
             nxt = [ result[ sl ] for sl in l ]
             result = nxt
 
         return result
-        """
+
 
 class TokenSequence:
 
