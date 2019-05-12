@@ -88,6 +88,10 @@ class SliceArray:
             return __getitem__slice( k.start, k.stop )
 
 
+    def shift( self, phase ):
+        return SliceArray( [ ix + phase for ix in self._data ] )
+
+
 class Strata:
 
     def __init__( self, layers=None ):
@@ -96,12 +100,21 @@ class Strata:
 
         if layers is not None:
             for l in layers:
-                self.layer( l )
+                self.add_layer( l )
 
 
     @property
     def depth( self ):
         return len( self._layers )
+
+
+    @property
+    def top( self ):
+
+        if 0 < self.depth:
+            return self._layers[ self.depth - 1 ]
+
+        return Strata()
 
 
     def __getitem__( self, sl ):
@@ -120,20 +133,30 @@ class Strata:
 
         start = sl
         stop = sl + 1
-        layers=[]
+        original_layers = []
 
         for l in self._layers[ : : -1 ]:
 
             this_sl = l[ start : stop ]
-            layers.insert( 0, this_sl )
+            original_layers.insert( 0, this_sl )
 
             start = this_sl.start
             stop = this_sl.stop
 
-        return Strata( layers=layers[ 0 : -1 ] )
+        relative_layers = []
+        for ix, l in enumerate( original_layers[ : 0 : -1 ] ):
+
+            prev_layer = original_layers[ self.depth - ix - 1 ]
+            start_index = prev_layer.start
+            this_layer = l.shift( - start_index )
+            relative_layers.insert( 0, this_layer )
+
+        relative_layers.insert( 0, original_layers[ 0 ] )
+
+        return Strata( layers=relative_layers )
 
 
-    def layer( self, indices ):
+    def add_layer( self, indices ):
 
         if isinstance( indices, SliceArray ):
             self._layers.append( indices )
@@ -142,15 +165,32 @@ class Strata:
             self._layers.append( SliceArray( indices ) )
 
 
+    def items( self ):
+        return [ list( l ) for l in self._layers ]
+
+
     def sieve( self, data ):
 
+        def _sieve( depth, data ):
+
+            if self.depth == depth:
+                return data
+
+            nxt_data = [ data[ sl ]
+                         for sl in self._layers[ depth ] ]
+
+            return _sieve( depth + 1, nxt_data )
+
+        return _sieve( 0, data )
+
+        """
         result = data
         for l in self._layers:
             nxt = [ result[ sl ] for sl in l ]
             result = nxt
 
         return result
-
+        """
 
 class TokenSequence:
 

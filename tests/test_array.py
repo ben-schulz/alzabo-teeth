@@ -91,6 +91,27 @@ def test__slicearray__identifies_first_and_last_indices():
     assert 29 == s.stop
 
 
+def test__slicearray__shifts_both_left_and_right():
+
+    s = SliceArray( [ 5, 13, 23, 29 ] )
+
+    left = s.shift( 3 )
+
+    assert 8 == left.start
+    assert 32 == left.stop
+    assert slice( 8, 16 ) == left[ 0 ]
+    assert slice( 16, 26 ) == left[ 1 ]
+    assert slice( 26, 32 ) == left[ 2 ]
+
+    right = s.shift( -2 )
+
+    assert 3 == right.start
+    assert 27 == right.stop
+    assert slice( 3, 11 ) == right[ 0 ]
+    assert slice( 11, 21 ) == right[ 1 ]
+    assert slice( 21, 27 ) == right[ 2 ]
+
+
 def test__strata__empty__layers_returns_whole_list():
 
     s = Strata()
@@ -102,7 +123,7 @@ def test__strata__empty__layers_returns_whole_list():
 def test__strata__applies_slices_from_single_layer():
 
     s = Strata()
-    s.layer( [ 0, 3, 5, 10 ] )
+    s.add_layer( [ 0, 3, 5, 10 ] )
 
     data = '0123456789'
 
@@ -113,8 +134,8 @@ def test__strata__slices_multiple_subsequent_layers():
 
     s = Strata()
 
-    s.layer( [ 0, 3, 5, 10 ] )
-    s.layer( [ 0, 2, 3 ] )
+    s.add_layer( [ 0, 3, 5, 10 ] )
+    s.add_layer( [ 0, 2, 3 ] )
 
     data = '0123456789'
 
@@ -124,13 +145,13 @@ def test__strata__slices_multiple_subsequent_layers():
 def test__strata__interprets_none_as_remainder_of_iterable():
 
     s = Strata()
-    s.layer( [ 0, 3, 5, None ] )
+    s.add_layer( [ 0, 3, 5, None ] )
 
     data = '0123456789'
 
     assert [ '012', '34', '56789' ] == s.sieve( data )
 
-    s.layer( [ 0, 2, None ] )
+    s.add_layer( [ 0, 2, None ] )
 
     assert [ [ '012', '34' ], [ '56789' ] ] == s.sieve( data )
 
@@ -149,21 +170,27 @@ def test__strata__returns_instance_restriced_to_given_top_index():
     data = '0123456789abcdef'
 
     s = Strata()
-    s.layer( [ 0, 3, 5, 10, 13, 17, 23 ] )
+    s.add_layer( [ 0, 3, 5, 10, 13, 17, 23 ] )
 
     scalar_0 = s[ 3 ]
 
     assert [ 'abc' ] == scalar_0.sieve( data )
 
-    s.layer( [ 0, 2, 4, None ] )
+    s.add_layer( [ 0, 2, 4, None ] )
 
     scalar_1 = s[ 1 ]
 
-    assert [ '56789', 'abc' ] == scalar_1.sieve( data )
+    assert [ [ '56789', 'abc' ] ] == scalar_1.sieve( data )
 
-#    s.layer( [ 1, 2 ] )
+    s.add_layer( [ 0, 1, 2 ] )
 
-#    scalar_2 = s[ 0 ]
+    scalar_2_0 = s[ 0 ]
+
+    assert [ [ [ '012', '34' ] ] ] == scalar_2_0.sieve( data )
+
+    scalar_2_1 = s[ 1 ]
+
+    assert [ [ [ '56789', 'abc' ] ] ] == scalar_2_1.sieve( data )
 
 
 def test__textstrata__getitem__returns_slice_at_zero_level():
