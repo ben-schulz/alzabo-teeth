@@ -146,10 +146,7 @@ class Strata:
 
         result = data
         for l in self._layers:
-            nxt = []
-            for sl in l:
-                nxt.append( result[ sl ] )
-
+            nxt = [ result[ sl ] for sl in l ]
             result = nxt
 
         return result
