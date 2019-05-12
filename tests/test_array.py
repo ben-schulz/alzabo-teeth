@@ -284,49 +284,6 @@ def test__textstrata__splits_on_predicate():
     assert t[ 4 ] == 'neat'
 
 
-
-def test__textstrata__adds_first_layers_manually():
-
-    """
-    t = TextStrata( 'ok wow neat. that is great.' )
-
-    t.add_layer( TokenSequence(
-        [ 2, 3, 6, 7, 12, 13, 17, 18, 20, 21 ] ) )
-
-    first = [ 'ok', ' ',  'wow', ' ', 'neat.',
-              ' ', 'that', ' ', 'is', ' ',  'great.' ]
-
-    for ix, token in enumerate( first ):
-        assert token == t.get_token( ix )
-
-    assert len( first ) == len( t.get_slice( slice( 0, None ) ) )
-    """
-
-
-def test__textstrata__adds_subsequent_layers_manually():
-
-    """
-    t = TextStrata( 'ok wow neat. that is great.' )
-
-    t.add_layer( TokenSequence(
-        [ 2, 3, 6, 7, 12, 13, 17, 18, 20, 21 ] ) )
-
-    first = [ 'ok', ' ',  'wow', ' ', 'neat.',
-              ' ', 'that', ' ', 'is', ' ',  'great.' ]
-
-    t.add_layer( TokenSequence( [ 3, 5 ] ) )
-
-    second = [ [ 'ok', ' ',  'wow' ], [ ' ', 'neat.' ],
-               [ ' ', 'that', ' ', 'is', ' ',  'great.' ] ]
-
-    foo = t.get_slice( slice( 0, 3 ) )
-    """
-
-###    assert second[ 0 ] == foo[ 0 ]
-#    assert second[ 1 ] == foo[ 1 ]
-#    assert second[ 2 ] == foo[ 2 ]
-
-
 def test__textstrata__layers_splits():
 
     text = """Apokolips is an armed camp
@@ -335,7 +292,7 @@ rule the wretches who build them!
 Life is the evil here!
 And death the great goal!"""
 
-    """
+
     t = TextStrata( text )
 
     def word_ends( x ):
@@ -345,15 +302,21 @@ And death the great goal!"""
         return '!' == x[ 0 ]
 
     t.split_where( word_ends )
+
+    assert 54 == len( t )
+
     t.split_where( sentence_ends )
 
     assert 6 == len( t )
 
     first = [ 'Apokolips', ' ', 'is', ' ', 'an', ' ', 'armed',
-              ' ', 'camp', ' ', 'where', ' ', 'those', ' ',
+              ' ', 'camp', '\n', 'where', ' ', 'those', ' ',
               'who', ' ', 'live', ' ', 'with', ' ',  'weapons',
-              ' ', 'rule', ' ',  'the', ' ',  'wretches', ' ',
+              '\n', 'rule', ' ',  'the', ' ',  'wretches', ' ',
               'who', ' ', 'build', ' ', 'them' ]
 
     assert first == t[ 0 ]
-    """
+
+    second = [ '!\n' ]
+
+    assert second == t[ 1 ]

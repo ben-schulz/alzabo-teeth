@@ -311,27 +311,7 @@ class TextStrata:
         if 1 > self.depth:
             return self._data[ sl ]
 
-        if 1 == self.depth:
-            _slice = self._layers.top[ sl ]
-            try:
-                return [ self._data[ s ] for s in _slice ]
-            except TypeError:
-                return self._data[ _slice ]
-
-        else:
-            depth = self.depth
-            _slice = self._layers[ depth - 1 ][ sl ]
-            try:
-                layers = [ self._layers[ depth - 2 ][ s ]
-                           for s in _slice ]
-            except TypeError:
-                layers = [ self._layers[ depth - 1 ] ]
-
-            actual = []
-            for l in layers:
-                actual.append( self._data[ l ] )
-
-            return actual
+        return self._layers[ sl ].sieve( self._data )[ 0 ]
 
 
     @property
@@ -356,9 +336,6 @@ class TextStrata:
                  for l in self._layers ]
 
 
-    def add_layer( self, seq ):
-        self._layers.add_layer( seq )
-
     def split_where( self, p ):
 
         if 0 == self.depth:
@@ -379,17 +356,20 @@ class TextStrata:
             self._layers.add_layer( SliceArray( layer ) )
             return
 
-        layer = []
+        layer = [ 0 ]
         prev_condition = p( self._layers[ 0 ] )
 
-        for ix in range( 0, len( self ) ):
+        for ix in range( 0, len( self._layers.top ) ):
 
-            this_condition = p( self._layers[ ix ] )
+            item = self._layers[ ix ].sieve( self._data )[ 0 ]
+            this_condition = p( item )
             is_boundary = prev_condition != this_condition
 
             if is_boundary:
                 layer.append( ix )
 
             prev_condition = this_condition
+
+        layer.append( None )
 
         self._layers.add_layer( SliceArray( layer ) )
