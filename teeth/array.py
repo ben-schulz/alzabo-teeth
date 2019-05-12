@@ -61,21 +61,22 @@ class SliceArray:
             return slice( self._data[ k ], self._data[ k + 1 ] )
 
 
-        def __getitem__slice( start, stop ):
+        def __getitem__slice( k ):
 
+            start = k.start
             try:
-                _stop = stop + 1
+                _stop = k.stop + 1
             except TypeError:
                 _stop = None
 
-            return SliceArray( self._data[ start : _stop ] )
+            return SliceArray( self._data[ start : _stop : k.step ] )
 
         try:
             k = int( k )
             return __getitem__int( k )
 
         except TypeError:
-            return __getitem__slice( k.start, k.stop )
+            return __getitem__slice( k )
 
 
     def shift( self, phase ):
@@ -109,20 +110,22 @@ class Strata:
 
     def __getitem__( self, sl ):
 
-        try:
-            int( sl )
-        except TypeError:
-            return None
-
         if 0 == self.depth:
             raise IndexError
+
+        try:
+            int( sl )
+            start = sl
+            stop = sl + 1
+
+        except TypeError:
+            start = sl.start
+            stop = sl.stop
 
         if 1 == self.depth:
             _sl = self._layers[ 0 ][ sl ]
             return Strata( layers=[ [ _sl.start, _sl.stop ] ] )
 
-        start = sl
-        stop = sl + 1
         original_layers = []
 
         for l in self._layers[ : : -1 ]:
@@ -173,69 +176,21 @@ class TextStrata:
     def __init__( self, text, *args, **kwargs ):
 
         self._data = CharArray( text )
-        self._layers = Strata()
+        self._layers = Strata( [ range( 0, len( self._data ) + 1 ) ] )
 
 
     def __len__( self ):
-
-        if 0 < self.depth:
-            return len( self._layers.top )
-        
-        return len( self._data )
-
-
-    def get_slice( self, sl ):
-
-        depth = self.depth - 1
-        layers = []
-        _slice = sl
-        while 0 <= depth:
-            layer = self._layers[ depth ][ _slice ]
-            layers.insert( 0, layer )
-
-            start = layer[ 0 ].start
-            stop = layer[ -1 ].stop
-
-            if stop is not None:
-                stop += 1
-
-            _slice = slice( start, stop )
-
-            depth -= 1
-
-
-        result = [ self._data[ s ] for s in layers[ 0 ] ]
-        for l in layers[ 1 : ]:
-            tmp = result[:]
-            result = [ tmp[ s ] for s in layers[ 1 ] ]
-
-        """
-        for l in layers[ 1 : ]:
-            result = [ result[ s ] for s in l ]
-        """
-
-        return result
-
-
-    def get_token( self, ix ):
-
-        _sl = slice( ix, ix + 1 )
-        _slice = self.get_slice( _sl )
-
-        return _slice[ 0 ]
+        return len( self._layers.top )
 
 
     def __getitem__( self, sl ):
-
-        if 1 > self.depth:
-            return self._data[ sl ]
-
         return self._layers[ sl ].sieve( self._data )[ 0 ]
 
 
     @property
     def depth( self ):
         return self._layers.depth
+
 
     @property
     def top_layer( self ):
@@ -247,33 +202,10 @@ class TextStrata:
 
 
     def tokens( self ):
-
-        if 1 > self.depth:
-            return list( self._data )
-
-        return [ l.sieve( self._data )
-                 for l in self._layers ]
+        return [ l.sieve( self._data ) for l in self._layers ]
 
 
     def split_where( self, p ):
-
-        if 0 == self.depth:
-
-            layer = [ 0 ]
-            prev_condition = p( self._data[ 0 ] )
-
-            for ix in range( 0, len( self._data ) ):
-                this_condition = p( self._data[ ix ] )
-                is_boundary = prev_condition != this_condition
-
-                if is_boundary:
-                    layer.append( ix )
-
-                prev_condition = this_condition
-
-            layer.append( None )
-            self._layers.add_layer( SliceArray( layer ) )
-            return
 
         layer = [ 0 ]
         prev_condition = p( self._layers[ 0 ] )
@@ -289,6 +221,6 @@ class TextStrata:
 
             prev_condition = this_condition
 
-        layer.append( None )
+        layer.append( len( self._layers.top ) )
 
         self._layers.add_layer( SliceArray( layer ) )
