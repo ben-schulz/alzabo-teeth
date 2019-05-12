@@ -254,13 +254,13 @@ class TextStrata:
     def __init__( self, text, *args, **kwargs ):
 
         self._data = CharArray( text )
-        self._layers = []
+        self._layers = Strata()
 
 
     def __len__( self ):
 
         if 0 < self.depth:
-            return len( self.top_layer )
+            return len( self._layers.top )
         
         return len( self._data )
 
@@ -312,7 +312,7 @@ class TextStrata:
             return self._data[ sl ]
 
         if 1 == self.depth:
-            _slice = self._layers[ self.depth -1 ][ sl ]
+            _slice = self._layers.top[ sl ]
             try:
                 return [ self._data[ s ] for s in _slice ]
             except TypeError:
@@ -336,7 +336,7 @@ class TextStrata:
 
     @property
     def depth( self ):
-        return len( self._layers )
+        return self._layers.depth
 
     @property
     def top_layer( self ):
@@ -352,20 +352,39 @@ class TextStrata:
         if 1 > self.depth:
             return list( self._data )
 
-        return [ self._data[ sl ] for sl in self.top_layer ]
+        return [ l.sieve( self._data )
+                 for l in self._layers ]
 
 
     def add_layer( self, seq ):
-        self._layers.append( seq )
+        self._layers.add_layer( seq )
 
     def split_where( self, p ):
 
+        if 0 == self.depth:
+
+            layer = [ 0 ]
+            prev_condition = p( self._data[ 0 ] )
+
+            for ix in range( 0, len( self._data ) ):
+                this_condition = p( self._data[ ix ] )
+                is_boundary = prev_condition != this_condition
+
+                if is_boundary:
+                    layer.append( ix )
+
+                prev_condition = this_condition
+
+            layer.append( None )
+            self._layers.add_layer( SliceArray( layer ) )
+            return
+
         layer = []
-        prev_condition = p( self[ 0 ] )
+        prev_condition = p( self._layers[ 0 ] )
 
         for ix in range( 0, len( self ) ):
 
-            this_condition = p( self[ ix ] )
+            this_condition = p( self._layers[ ix ] )
             is_boundary = prev_condition != this_condition
 
             if is_boundary:
@@ -373,4 +392,4 @@ class TextStrata:
 
             prev_condition = this_condition
 
-        self._layers.append( TokenSequence( layer ) )
+        self._layers.add_layer( SliceArray( layer ) )
