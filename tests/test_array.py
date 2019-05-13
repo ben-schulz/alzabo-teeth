@@ -186,7 +186,10 @@ def test__textstrata__getitem__returns_slice_at_zero_level():
     t = TextStrata( 'ok wow' )
 
     assert 'k' == t[ 1 ]
-    assert 'wow' == t[ 3 : ]
+    assert 'wow' == t[ 3: ]
+
+    assert 'wow k' == t[ slice( -1, -6, -1 ) ]
+    assert 'k wo' == t[ slice( -5, -1, 1 ) ]
 
 
 def test__textstrata__splits_on_predicate():
@@ -200,11 +203,11 @@ def test__textstrata__splits_on_predicate():
 
     assert 5 == len( t )
 
-    assert 'ok' == str.join( '', t[ 0 ] )
-    assert ' ' == str.join( '', t[ 1 ] )
-    assert 'wow' == str.join( '', t[ 2 ] )
-    assert ' ' == str.join( '', t[ 3 ] )
-    assert 'neat' == str.join( '', t[ 4 ] )
+    assert t[ 0 ] == 'ok'
+    assert t[ 1 ] == ' '
+    assert t[ 2 ] == 'wow'
+    assert t[ 3 ] == ' '
+    assert t[ 4 ] == 'neat'
 
 
 def test__textstrata__layers_splits():
@@ -216,7 +219,6 @@ Life is the evil here!
 And death the great goal!"""
 
 
-    """
     t = TextStrata( text )
 
     def word_ends( x ):
@@ -244,4 +246,3 @@ And death the great goal!"""
     second = [ '!\n' ]
 
     assert second == t[ 1 ]
-    """
