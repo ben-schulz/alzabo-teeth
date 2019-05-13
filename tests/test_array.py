@@ -218,7 +218,6 @@ rule the wretches who build them!
 Life is the evil here!
 And death the great goal!"""
 
-
     t = TextStrata( text )
 
     def word_ends( x ):
