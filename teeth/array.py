@@ -184,47 +184,6 @@ class TextStrata:
         return len( self._data )
 
 
-    def get_slice( self, sl ):
-
-        depth = self.depth - 1
-        layers = []
-        _slice = sl
-        while 0 <= depth:
-            layer = self._layers[ depth ][ _slice ]
-            layers.insert( 0, layer )
-
-            start = layer[ 0 ].start
-            stop = layer[ -1 ].stop
-
-            if stop is not None:
-                stop += 1
-
-            _slice = slice( start, stop )
-
-            depth -= 1
-
-
-        result = [ self._data[ s ] for s in layers[ 0 ] ]
-        for l in layers[ 1 : ]:
-            tmp = result[:]
-            result = [ tmp[ s ] for s in layers[ 1 ] ]
-
-        """
-        for l in layers[ 1 : ]:
-            result = [ result[ s ] for s in l ]
-        """
-
-        return result
-
-
-    def get_token( self, ix ):
-
-        _sl = slice( ix, ix + 1 )
-        _slice = self.get_slice( _sl )
-
-        return _slice[ 0 ]
-
-
     def __getitem__( self, sl ):
 
         if 1 > self.depth:
