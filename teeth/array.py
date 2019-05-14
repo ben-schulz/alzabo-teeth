@@ -111,8 +111,12 @@ class Strata:
 
         try:
             int( sl )
+            start = sl
+            stop = sl + 1
+
         except TypeError:
-            return None
+            start = sl.start
+            stop = sl.stop
 
         if 0 == self.depth:
             raise IndexError
@@ -121,8 +125,6 @@ class Strata:
             _sl = self._layers[ 0 ][ sl ]
             return Strata( layers=[ [ _sl.start, _sl.stop ] ] )
 
-        start = sl
-        stop = sl + 1
         original_layers = []
 
         for l in self._layers[ : : -1 ]:
