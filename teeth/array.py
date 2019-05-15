@@ -98,6 +98,10 @@ class Strata:
         return len( self._layers )
 
 
+    def __len__( self ):
+        return len( self.top )
+
+
     @property
     def top( self ):
 
