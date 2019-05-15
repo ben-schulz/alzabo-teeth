@@ -229,7 +229,7 @@ And death the great goal!"""
     assert 56 == len( t )
 
     def sentence_ends( x ):
-        return '!' == x[ 0 ]
+        return 0 < len( x ) and x[ 0 ] in '.?!'
 
     t.split_where( sentence_ends )
 
