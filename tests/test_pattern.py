@@ -37,5 +37,5 @@ def test__punctuation__matches_typical():
     assert not match( ' ' )
 
 
-def test__something():
+def test__unicode_characters_in_english_punctuation():
     assert '\u2019' in teeth.tokens.english_punctuation
