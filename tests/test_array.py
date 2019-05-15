@@ -1,4 +1,5 @@
 from teeth.array import CharArray, SliceArray, Strata, TextStrata
+from teeth.pattern import matches
 
 
 def test__chararray__getitem__returns_slice():
@@ -221,14 +222,14 @@ And death the great goal!"""
     t = TextStrata( text )
 
     def word_ends( x ):
-        return not str.isalpha( x )
-
-    def sentence_ends( x ):
-        return '!' == x[ 0 ]
+        return matches( '[ \n!]+' )( x )
 
     t.split_where( word_ends )
 
-    assert 54 == len( t )
+    assert 56 == len( t )
+
+    def sentence_ends( x ):
+        return '!' == x[ 0 ]
 
     t.split_where( sentence_ends )
 
@@ -242,6 +243,6 @@ And death the great goal!"""
 
     assert first == t[ 0 ]
 
-    second = [ '!\n' ]
+    second = [ '!' ]
 
     assert second == t[ 1 ]
