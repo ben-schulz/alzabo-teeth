@@ -246,3 +246,12 @@ And death the great goal!"""
     second = [ '!' ]
 
     assert second == t[ 1 ]
+
+    third = [ '\n', 'Life', ' ', 'is', ' ',
+              'the', ' ', 'evil', ' ', 'here' ]
+
+    assert third == t[ 2 ]
+
+    fourth = [ '!' ]
+
+    assert fourth == t[ 3 ]
