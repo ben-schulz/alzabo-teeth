@@ -207,7 +207,7 @@ class TextStrata:
         return [ slice( len( self._data ) ) ]
 
 
-    def tokens( self ):
+    def items( self ):
 
         if 1 > self.depth:
             return list( self._data )
@@ -223,7 +223,9 @@ class TextStrata:
             layer = [ 0 ]
             prev_condition = p( self._data[ 0 ] )
 
-            for ix in range( 0, len( self._data ) ):
+            item_count = len( self._data )
+
+            for ix in range( 0, item_count ):
                 this_condition = p( self._data[ ix ] )
                 is_boundary = prev_condition != this_condition
 
@@ -232,14 +234,15 @@ class TextStrata:
 
                 prev_condition = this_condition
 
-            layer.append( None )
+            layer.append( item_count )
             self._layers.add_layer( SliceArray( layer ) )
             return
 
         layer = [ 0 ]
         prev_condition = p( self._layers[ 0 ] )
+        item_count = len( self._layers.top )
 
-        for ix in range( 0, len( self._layers.top ) ):
+        for ix in range( 0, item_count ):
 
             item = self._layers[ ix ].sieve( self._data )[ 0 ]
             this_condition = p( item )
@@ -250,6 +253,6 @@ class TextStrata:
 
             prev_condition = this_condition
 
-        layer.append( None )
+        layer.append( item_count )
 
         self._layers.add_layer( SliceArray( layer ) )
