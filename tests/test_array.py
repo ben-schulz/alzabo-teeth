@@ -255,3 +255,47 @@ And death the great goal!"""
     fourth = [ '!' ]
 
     assert fourth == t[ 3 ]
+
+
+def test__textstrata__iterable_by_item():
+
+    text = """Apokolips is an armed camp
+where those who live with weapons
+rule the wretches who build them!
+Life is the evil here!
+And death the great goal!"""
+
+    t = TextStrata( text )
+
+    def word_ends( x ):
+        return matches( '[ \n!]+' )( x )
+
+    t.split_where( word_ends )
+
+    def sentence_ends( x ):
+        return 0 < len( x ) and x[ 0 ] in '.?!'
+
+    t.split_where( sentence_ends )
+
+    item = iter( t )
+
+    first = [ 'Apokolips', ' ', 'is', ' ', 'an', ' ', 'armed',
+              ' ', 'camp', '\n', 'where', ' ', 'those', ' ',
+              'who', ' ', 'live', ' ', 'with', ' ',  'weapons',
+              '\n', 'rule', ' ',  'the', ' ',  'wretches', ' ',
+              'who', ' ', 'build', ' ', 'them' ]
+
+    assert first == next( item )
+
+    second = [ '!' ]
+
+    assert second == next( item )
+
+    third = [ '\n', 'Life', ' ', 'is', ' ',
+              'the', ' ', 'evil', ' ', 'here' ]
+
+    assert third == next( item )
+
+    fourth = [ '!' ]
+
+    assert fourth == next( item )

@@ -195,7 +195,12 @@ class TextStrata:
         if 1 > self.depth:
             return self._data[ sl ]
 
-        return self._layers[ sl ].sieve( self._data )[ 0 ]
+        value = self._layers[ sl ].sieve( self._data )
+
+        if 1 == len( value ):
+            return value[ 0 ]
+
+        return value
 
 
     @property
@@ -243,13 +248,13 @@ class TextStrata:
             return
 
         layer = [ 0 ]
-        first_item = self._layers[ 0 ].sieve( self._data )[ 0 ]
+        first_item = self._layers[ 0 ].sieve( self._data )
         prev_condition = p( first_item )
         item_count = len( self._layers.top )
 
         for ix in range( 0, item_count ):
 
-            item = self._layers[ ix ].sieve( self._data )[ 0 ]
+            item = self._layers[ ix ].sieve( self._data )
             this_condition = p( item )
             is_boundary = prev_condition != this_condition
 
