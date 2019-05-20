@@ -1,4 +1,6 @@
-from teeth.array import CharArray, SliceArray, Strata, TextStrata
+from teeth.array import CharArray, SliceArray, Strata
+from teeth.array import TextStrata, layer
+
 from teeth.pattern import matches
 
 
@@ -299,3 +301,26 @@ And death the great goal!"""
     fourth = [ '!' ]
 
     assert fourth == next( item )
+
+
+def test__layer_context__evaluates_at_a_given_depth():
+
+    text = """Apokolips is an armed camp
+where those who live with weapons
+rule the wretches who build them!
+Life is the evil here!
+And death the great goal!"""
+
+    t = TextStrata( text )
+
+    def word_ends( x ):
+        return matches( '[ \n!]+' )( x )
+
+    t.split_where( word_ends )
+
+    with layer( 0, t ) as l:
+        assert 0 == l.depth
+        assert 'is an armed ' == l[ 10 : 22 ]
+
+    assert 1 == t.depth
+    assert 'where' == t[ 10 ]

@@ -1,3 +1,4 @@
+import contextlib
 import numpy
 
 class CharArray:
@@ -180,6 +181,7 @@ class TextStrata:
 
         self._data = CharArray( text )
         self._layers = Strata()
+        self._depth = self._layers.depth
 
 
     def __len__( self ):
@@ -205,7 +207,7 @@ class TextStrata:
 
     @property
     def depth( self ):
-        return self._layers.depth
+        return self._depth
 
     @property
     def top_layer( self ):
@@ -245,6 +247,8 @@ class TextStrata:
 
             layer.append( item_count )
             self._layers.add_layer( SliceArray( layer ) )
+            self._depth += 1
+
             return
 
         layer = [ 0 ]
@@ -266,3 +270,14 @@ class TextStrata:
         layer.append( item_count )
 
         self._layers.add_layer( SliceArray( layer ) )
+        self._depth += 1
+
+@contextlib.contextmanager
+def layer( depth, strata ):
+
+    prev = strata.depth
+    strata._depth = depth
+
+    yield strata
+
+    strata._depth = prev
