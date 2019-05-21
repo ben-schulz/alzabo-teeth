@@ -156,6 +156,10 @@ class Strata:
         else:
             self._layers.append( SliceArray( indices ) )
 
+    def pop_layer( self ):
+
+        return self._layers.pop()
+
 
     def items( self ):
         return [ list( l ) for l in self._layers ]
@@ -271,9 +275,25 @@ class TextStrata:
 @contextlib.contextmanager
 def layer( depth, strata ):
 
-    prev = strata.depth
+    prev_depth = strata.depth
+
+    depth_diff = prev_depth - depth
+
+    if 0 > depth_diff:
+        raise IndexError
+
+    excluded_layers = []
+    for _ in range( 0, depth_diff ):
+        excluded_layers.insert( 0, strata._layers.pop_layer() )
+
     strata._depth = depth
 
     yield strata
 
-    strata._depth = prev
+    while strata._depth > depth:
+        strata._layers.pop_layer()
+        strata._depth -= 1
+
+    strata._depth = prev_depth
+    for l in excluded_layers:
+        strata._layers.add_layer( l )

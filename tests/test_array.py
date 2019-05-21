@@ -325,5 +325,16 @@ And death the great goal!"""
         assert 0 == l.depth
         assert 'is an armed ' == l[ 10 : 22 ]
 
+        def sentence_ends( x ):
+            return matches( '[.?!]' )( x )
+
+        l.split_where( sentence_ends )
+
+        second = '!'
+        third = '\nLife is the evil here'
+
+        assert [ second, third ] == l[ 1 : 3 ]
+
     assert 1 == t.depth
+    assert 'is' == t[ 2 ]
     assert 'where' == t[ 10 ]
