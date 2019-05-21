@@ -126,10 +126,6 @@ class Strata:
         if 0 == self.depth:
             raise IndexError
 
-        if 1 == self.depth:
-            _sl = self._layers[ 0 ][ sl ]
-            return Strata( layers=[ [ _sl.start, _sl.stop ] ] )
-
         original_layers = []
 
         for l in self._layers[ : : -1 ]:

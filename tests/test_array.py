@@ -212,6 +212,9 @@ def test__textstrata__splits_on_predicate():
     assert t[ 3 ] == ' '
     assert t[ 4 ] == 'neat'
 
+    assert [ 'ok', ' ', 'wow' ] == t[ 0 : 3 ]
+    assert [ 'wow', ' ', 'neat' ] == t[ 2 : 5 ]
+
 
 def test__textstrata__layers_splits():
 
