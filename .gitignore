@@ -1,7 +1,3 @@
-# assume notebooks are scratch work only
-*.ipynb
-example_text.txt
-
 # Byte-compiled / optimized / DLL files
 __pycache__/
 *.py[cod]
