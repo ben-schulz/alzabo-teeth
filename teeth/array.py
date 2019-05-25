@@ -272,6 +272,20 @@ class TextStrata:
         self._layers.add_layer( SliceArray( layer ) )
         self._depth += 1
 
+
+@contextlib.contextmanager
+def split( pred, strata ):
+
+    prev_depth = strata.depth
+    strata.split_where( pred )
+
+    yield strata
+
+    while strata._depth > prev_depth:
+        strata._layers.pop_layer()
+        strata._depth -= 1
+
+
 @contextlib.contextmanager
 def layer( depth, strata ):
 

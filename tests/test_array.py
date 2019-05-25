@@ -1,5 +1,6 @@
 from teeth.array import CharArray, SliceArray, Strata
-from teeth.array import TextStrata, layer
+from teeth.array import TextStrata
+from teeth.array import layer, split
 
 from teeth.pattern import matches
 
@@ -306,7 +307,7 @@ And death the great goal!"""
     assert fourth == next( item )
 
 
-def test__layer_context__evaluates_at_a_given_depth():
+def test__with_layer__evaluates_at_a_given_depth():
 
     text = """Apokolips is an armed camp
 where those who live with weapons
@@ -338,3 +339,49 @@ And death the great goal!"""
     assert 1 == t.depth
     assert 'is' == t[ 2 ]
     assert 'where' == t[ 10 ]
+
+
+def test__with_split__evaluates_to_given_split_in_block():
+
+    text = """Apokolips is an armed camp
+where those who live with weapons
+rule the wretches who build them!
+Life is the evil here!
+And death the great goal!"""
+
+    t = TextStrata( text )
+
+    def word_ends( x ):
+        return matches( '[ \n!]+' )( x )
+
+    t.split_where( word_ends )
+
+    def sentence_ends( x ):
+        return 0 < len( x ) and x[ 0 ] in '.?!'
+
+    with split( sentence_ends, t ) as sentences:
+
+        first = [ 'Apokolips', ' ', 'is', ' ', 'an', ' ', 'armed',
+                  ' ', 'camp', '\n', 'where', ' ', 'those', ' ',
+                  'who', ' ', 'live', ' ', 'with', ' ',  'weapons',
+                  '\n', 'rule', ' ',  'the', ' ',  'wretches', ' ',
+                  'who', ' ', 'build', ' ', 'them' ]
+
+        assert first == sentences[ 0 ]
+
+        second = [ '!' ]
+
+        assert second == sentences[ 1 ]
+
+        third = [ '\n', 'Life', ' ', 'is', ' ',
+              'the', ' ', 'evil', ' ', 'here' ]
+
+        assert third == sentences[ 2 ]
+
+        fourth = [ '!' ]
+
+        assert fourth == sentences[ 3 ]
+
+    assert 'Apokolips' == t[ 0 ]
+    assert ' ' == t[ 1 ]
+    assert 'is' == t[ 2 ]
