@@ -23,3 +23,9 @@ def test__array_module__examples_work():
         raw_text = f.read()
 
     assert 'MOBY-DICK;\n\nor, THE WHALE.\n' == raw_text[ 0 : 27 ]
+
+    from teeth.array import TextStrata
+
+    t = TextStrata( raw_text )
+
+    assert 'MOBY-DICK;\n\nor, THE WHALE.\n' == t[ 0 : 27 ]
