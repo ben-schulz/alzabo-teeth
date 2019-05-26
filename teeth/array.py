@@ -243,10 +243,7 @@ class TextStrata:
                     prev_condition = this_condition
                     continue
 
-                is_boundary = ( prev_condition or this_condition )
-
-                if is_boundary:
-                    layer.append( ix )
+                layer.append( ix )
 
                 prev_condition = this_condition
 
@@ -270,11 +267,7 @@ class TextStrata:
                 prev_condition = this_condition
                 continue
 
-            is_boundary = prev_condition or this_condition
-
-            if is_boundary:
-                layer.append( ix )
-
+            layer.append( ix )
             prev_condition = this_condition
 
         layer.append( item_count )
