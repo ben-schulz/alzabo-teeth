@@ -21,6 +21,10 @@ def matches( pattern ):
         rexpr = pattern
 
     def _only( x ):
-        return rexpr.search( x )
+
+        if rexpr.search( x ):
+            return True
+        else:
+            return False
 
     return _only

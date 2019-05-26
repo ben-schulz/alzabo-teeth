@@ -243,8 +243,7 @@ class TextStrata:
                     prev_condition = this_condition
                     continue
 
-                is_boundary = ( prev_condition is not None
-                                or this_condition is not None )
+                is_boundary = ( prev_condition or this_condition )
 
                 if is_boundary:
                     layer.append( ix )
@@ -268,11 +267,10 @@ class TextStrata:
             this_condition = p( item )
 
             if not prev_condition and not this_condition:
-                    prev_condition = this_condition
-                    continue
+                prev_condition = this_condition
+                continue
 
-            is_boundary = ( prev_condition is not None
-                            or this_condition is not None )
+            is_boundary = prev_condition or this_condition
 
             if is_boundary:
                 layer.append( ix )
