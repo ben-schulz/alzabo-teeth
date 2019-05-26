@@ -263,6 +263,26 @@ And death the great goal!"""
     assert fourth == t[ 3 ]
 
 
+def test__textstrata__splits_all_delimiters_by_default():
+
+    text = "ok wow... great job!"
+
+    t = TextStrata( text )
+
+    def word_ends( x ):
+        return matches( '[ \n.!]+' )( x )
+
+    t.split_where( word_ends )
+
+    assert 'ok' == t[ 0 ]
+    assert ' ' == t[ 1 ]
+    assert 'wow' == t[ 2 ]
+    assert '.' == t[ 3 ]
+    assert '.' == t[ 4 ]
+    assert '.' == t[ 5 ]
+    assert ' ' == t[ 6 ]
+
+
 def test__textstrata__iterable_by_item():
 
     text = """Apokolips is an armed camp
@@ -353,6 +373,12 @@ And death the great goal!"""
 
     def word_ends( x ):
         return matches( '[ \n!]+' )( x )
+
+    with split( word_ends, t ) as words:
+
+        assert 'Apokolips' == words[ 0 ]
+        assert ' ' == words[ 1 ]
+        assert 'is' == words[ 2 ]
 
     t.split_where( word_ends )
 
