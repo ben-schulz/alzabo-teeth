@@ -227,7 +227,7 @@ class TextStrata:
                  for l in self._layers ]
 
 
-    def split_where( self, p ):
+    def split_where( self, p, group_delimiters=False ):
 
         if 0 == self.depth:
 
@@ -239,7 +239,8 @@ class TextStrata:
             for ix in range( 0, item_count ):
                 this_condition = p( self._data[ ix ] )
 
-                if prev_condition or this_condition:
+                is_split = prev_condition != this_condition
+                if is_split:
                     layer.append( ix )
 
                 prev_condition = this_condition
@@ -260,7 +261,8 @@ class TextStrata:
             item = self._layers[ ix ].sieve( self._data )
             this_condition = p( item )
 
-            if prev_condition or this_condition:
+            is_split = prev_condition != this_condition
+            if is_split:
                 layer.append( ix )
 
             prev_condition = this_condition

@@ -232,10 +232,10 @@ And death the great goal!"""
 
     t.split_where( word_ends )
 
-    assert 56 == len( t )
+    assert 54 == len( t )
 
     def sentence_ends( x ):
-        return 0 < len( x ) and x[ 0 ] in '.?!'
+        return 0 < len( x ) and x[ 0 ][ 0 ] in '.?!'
 
     t.split_where( sentence_ends )
 
@@ -249,21 +249,21 @@ And death the great goal!"""
 
     assert first == t[ 0 ]
 
-    second = [ '!' ]
+    second = [ '!\n' ]
 
     assert second == t[ 1 ]
 
-    third = [ '\n', 'Life', ' ', 'is', ' ',
+    third = [ 'Life', ' ', 'is', ' ',
               'the', ' ', 'evil', ' ', 'here' ]
 
     assert third == t[ 2 ]
 
-    fourth = [ '!' ]
+    fourth = [ '!\n' ]
 
     assert fourth == t[ 3 ]
 
 
-def test__textstrata__splits_all_delimiters_by_default():
+def test__textstrata__groups_all_delimiters_by_default():
 
     text = "ok wow... great job!"
 
@@ -277,10 +277,7 @@ def test__textstrata__splits_all_delimiters_by_default():
     assert 'ok' == t[ 0 ]
     assert ' ' == t[ 1 ]
     assert 'wow' == t[ 2 ]
-    assert '.' == t[ 3 ]
-    assert '.' == t[ 4 ]
-    assert '.' == t[ 5 ]
-    assert ' ' == t[ 6 ]
+    assert '... ' == t[ 3 ]
 
 
 def test__textstrata__iterable_by_item():
@@ -299,7 +296,7 @@ And death the great goal!"""
     t.split_where( word_ends )
 
     def sentence_ends( x ):
-        return 0 < len( x ) and x[ 0 ] in '.?!'
+        return 0 < len( x ) and x[ 0 ][ 0 ] in '.?!'
 
     t.split_where( sentence_ends )
 
@@ -313,16 +310,16 @@ And death the great goal!"""
 
     assert first == next( item )
 
-    second = [ '!' ]
+    second = [ '!\n' ]
 
     assert second == next( item )
 
-    third = [ '\n', 'Life', ' ', 'is', ' ',
+    third = [ 'Life', ' ', 'is', ' ',
               'the', ' ', 'evil', ' ', 'here' ]
 
     assert third == next( item )
 
-    fourth = [ '!' ]
+    fourth = [ '!\n' ]
 
     assert fourth == next( item )
 
@@ -383,7 +380,7 @@ And death the great goal!"""
     t.split_where( word_ends )
 
     def sentence_ends( x ):
-        return 0 < len( x ) and x[ 0 ] in '.?!'
+        return 0 < len( x ) and x[ 0 ][ 0 ] in '.?!'
 
     with split( sentence_ends, t ) as sentences:
 
@@ -395,16 +392,16 @@ And death the great goal!"""
 
         assert first == sentences[ 0 ]
 
-        second = [ '!' ]
+        second = [ '!\n' ]
 
         assert second == sentences[ 1 ]
 
-        third = [ '\n', 'Life', ' ', 'is', ' ',
+        third = [ 'Life', ' ', 'is', ' ',
               'the', ' ', 'evil', ' ', 'here' ]
 
         assert third == sentences[ 2 ]
 
-        fourth = [ '!' ]
+        fourth = [ '!\n' ]
 
         assert fourth == sentences[ 3 ]
 
