@@ -238,7 +238,13 @@ class TextStrata:
 
             for ix in range( 0, item_count ):
                 this_condition = p( self._data[ ix ] )
-                is_boundary = prev_condition != this_condition
+
+                if not prev_condition and not this_condition:
+                    prev_condition = this_condition
+                    continue
+
+                is_boundary = ( prev_condition is not None
+                                or this_condition is not None )
 
                 if is_boundary:
                     layer.append( ix )
@@ -260,7 +266,13 @@ class TextStrata:
 
             item = self._layers[ ix ].sieve( self._data )
             this_condition = p( item )
-            is_boundary = prev_condition != this_condition
+
+            if not prev_condition and not this_condition:
+                    prev_condition = this_condition
+                    continue
+
+            is_boundary = ( prev_condition is not None
+                            or this_condition is not None )
 
             if is_boundary:
                 layer.append( ix )
