@@ -239,11 +239,8 @@ class TextStrata:
             for ix in range( 0, item_count ):
                 this_condition = p( self._data[ ix ] )
 
-                if not prev_condition and not this_condition:
-                    prev_condition = this_condition
-                    continue
-
-                layer.append( ix )
+                if prev_condition or this_condition:
+                    layer.append( ix )
 
                 prev_condition = this_condition
 
@@ -263,11 +260,9 @@ class TextStrata:
             item = self._layers[ ix ].sieve( self._data )
             this_condition = p( item )
 
-            if not prev_condition and not this_condition:
-                prev_condition = this_condition
-                continue
+            if prev_condition or this_condition:
+                layer.append( ix )
 
-            layer.append( ix )
             prev_condition = this_condition
 
         layer.append( item_count )
