@@ -279,11 +279,13 @@ def split( pred, strata ):
     prev_depth = strata.depth
     strata.split_where( pred )
 
-    yield strata
+    try:
+        yield strata
 
-    while strata._depth > prev_depth:
-        strata._layers.pop_layer()
-        strata._depth -= 1
+    finally:
+        while strata._depth > prev_depth:
+            strata._layers.pop_layer()
+            strata._depth -= 1
 
 
 @contextlib.contextmanager
@@ -302,12 +304,14 @@ def layer( depth, strata ):
 
     strata._depth = depth
 
-    yield strata
+    try:
+        yield strata
 
-    while strata._depth > depth:
-        strata._layers.pop_layer()
-        strata._depth -= 1
+    finally:
+        while strata._depth > depth:
+            strata._layers.pop_layer()
+            strata._depth -= 1
 
-    strata._depth = prev_depth
-    for l in excluded_layers:
-        strata._layers.add_layer( l )
+        strata._depth = prev_depth
+        for l in excluded_layers:
+            strata._layers.add_layer( l )

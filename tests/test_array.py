@@ -408,3 +408,24 @@ And death the great goal!"""
     assert 'Apokolips' == t[ 0 ]
     assert ' ' == t[ 1 ]
     assert 'is' == t[ 2 ]
+
+
+def test__with_split__restores_state_on_error():
+
+    text = "ok wow neat that is great"
+
+    t = TextStrata( text )
+
+    def the_letter_e( x ):
+        return matches( 'e' )( x )
+
+    try:
+        with split( the_letter_e, t ) as tokens:
+            first = tokens[ 0 ]
+            raise ValueError
+
+    except ValueError:
+        pass
+
+    assert 'o' == t[ 0 ]
+    assert 'ok wow n' == first
