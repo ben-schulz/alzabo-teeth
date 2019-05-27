@@ -29,3 +29,21 @@ def test__array_module__examples_work():
     t = TextStrata( raw_text )
 
     assert 'MOBY-DICK;\n\nor, THE WHALE.\n' == t[ 0 : 27 ]
+
+    from teeth.array import split
+
+    def not_a_word( x ):
+        return x in ' \n'
+
+    with split( not_a_word, t ) as words:
+        assert ( [
+            'MOBY-DICK;', '\n\n', 'or,',
+            ' ', 'THE', ' ', 'WHALE.' ] == words[ 0 : 7 ] )
+
+    def not_a_word( x ):
+        return x in ' \n;,.!?'
+
+    with split( not_a_word, t ) as words:
+        assert ( [
+            'MOBY-DICK', ';\n\n', 'or',
+            ', ', 'THE', ' ', 'WHALE' ] == words[ 0 : 7 ] )
