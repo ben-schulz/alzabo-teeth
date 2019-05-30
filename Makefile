@@ -6,7 +6,8 @@ ENTR_FLAGS = -c
 NEED_ENTR = "'make watch' requires entr to be installed."
 
 PYTEST = python -m pytest
-PYTEST_FLAGS = -s
+PYTEST_DEV_FLAGS = -s -m 'not docs'
+PYTEST_RELEASE_FLAGS = -s
 
 watch:
 
@@ -14,6 +15,9 @@ watch:
 	ls $(SRC_FILES) | $(ENTR) $(ENTR_FLAGS) $(PYTEST) $(PYTEST_FLAGS)
 
 test:
-	$(PYTEST) $(PYTEST_FLAGS)
+	$(PYTEST) $(PYTEST_DEV_FLAGS)
 
-.PHONY: watch test
+test_release:
+	$(PYTEST) $(PYTEST_RELEASE_FLAGS)
+
+.PHONY: watch test test_release

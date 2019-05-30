@@ -10,6 +10,7 @@ or the docs need to be updated.
 """
 
 import os
+import pytest
 
 this_file = os.path.abspath( __file__ )
 this_dir = os.path.join( os.path.dirname( this_file ) )
@@ -17,6 +18,7 @@ parent_dir = os.path.join( this_dir, '..' )
 
 raw_text_path = os.path.join( parent_dir, 'docs/moby_dick.txt' )
 
+@pytest.mark.docs
 def test__array_module__examples_work():
 
     with open( raw_text_path, 'r') as f:
