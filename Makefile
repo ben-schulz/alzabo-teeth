@@ -12,7 +12,7 @@ PYTEST_RELEASE_FLAGS = -s
 watch:
 
 	which $(ENTR) || ( echo $(NEED_ENTR) && exit 1 )
-	ls $(SRC_FILES) | $(ENTR) $(ENTR_FLAGS) $(PYTEST) $(PYTEST_FLAGS)
+	ls $(SRC_FILES) | $(ENTR) $(ENTR_FLAGS) $(PYTEST) $(PYTEST_DEV_FLAGS)
 
 test:
 	$(PYTEST) $(PYTEST_DEV_FLAGS)

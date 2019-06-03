@@ -1,122 +1,89 @@
-import re
-import string
+from teeth.stream import Span, Flux
 
-from teeth.stream import Flux
-from teeth.transforms import upper, lower, replace, remove
+def test__span__splits_at_single_index():
 
+    span = Span( 2, 11 )
 
-def test__empty__is_a_plain_iterable():
+    ( left, right ) = span.split( 5 )
 
-    f = iter( Flux( 'the cat sat on the mat.' ) )
+    assert 2 == left.start
+    assert 5 == left.stop
 
-    first = next( f )
-    second = next( f )
-
-    assert 't' == first
-    assert 'h' == second
+    assert 5 == right.start
+    assert 11 == right.stop
 
 
-def test__wind__applies_a_transformation():
+def test__span__excises_an_interior_interval():
 
-    f = Flux( 'the cat sat on the mat.' )
+    span = Span( 5, 29 )
 
-    f.wind( upper )
+    ( left, right ) = span.excise( 11, 23 )
 
-    flow = iter( f )
+    assert left.start == 5
+    assert left.stop == 11
 
-    first = next( flow )
-    second = next( flow )
+    assert right.start == 22
+    assert right.stop == 29
 
-    assert 'T' == first
-    assert 'H' == second
+    ( left, right ) = span.excise( *Span( 11, 23 ) )
 
+    assert left.start == 5
+    assert left.stop == 11
 
-def test__iter__produces_stop_iteration_on_no_more_data():
-
-    f = Flux( 'the' )
-
-    f.wind( upper )
-
-    flow = iter( f )
-
-    assert 'T' == next( flow )
-    assert 'H' == next( flow )
-    assert 'E' == next( flow )
-
-    try:
-        next( flow )
-
-    except StopIteration:
-        return
-
-    assert False, 'expected \'StopIteration\' raised.'
+    assert right.start == 22
+    assert right.stop == 29
 
 
-def test__wind__applies_multiple_subsequent_transformation():
+def test__span__apply__works_like_slice_for_strings():
 
-    f = Flux( 'abcdabcd' )
+    text = "the cat sat on the mat."
 
-    f.wind( replace( 'd', '-' ) )
-    f.wind( upper )
-    f.wind( replace( '-', 'e' ) )
+    span = Span( 4, 11 )
 
-    flow = iter( f )
+    result = span.apply( text )
 
-    result = []
-
-    while True:
-        try:
-            result.append( next( flow ) )
-        except StopIteration:
-            break
-
-    assert result == list( 'ABCeABCe' )
-
-def test__unwind__removes_the_last_applied_transform():
-
-    f = Flux( 'abcdabcd' )
-
-    f.wind( replace( 'd', '-' ) )
-    f.wind( upper )
-    f.wind( replace( '-', 'e' ) )
-
-    f.unwind()
-
-    flow = iter( f )
-
-    result = []
-
-    while True:
-        try:
-            result.append( next( flow ) )
-        except StopIteration:
-            break
-
-    assert result == list( 'ABC-ABC-' )
+    assert 'cat sat' == result
 
 
-def test__getitem__return_slice_with_transforms():
+def test__span__apply__nests_subspans_in_result():
 
-    f = Flux( 'the cat sat on the mat.' )
+    text = '0123456789abcdef'
 
-    f.wind( upper )
+    span = Span( 7, 15 )
 
-    result = f[ 4:11 ]
+    span.stratify( Span( 1, 3 ), Span( 4, 7 ), relative=True )
 
-    assert result == 'CAT SAT'
+    result = span.apply( text )
+
+    assert [ '89', 'bcd' ] == result
+
+    span = Span( 7, 15 )
+
+    span.stratify( Span( 8, 10 ), Span( 11, 14 ), relative=False )
+
+    result = span.apply( text )
+
+    assert [ '89', 'bcd' ] == result
 
 
-def test__split__returns_new_iterable_of_tokens():
+def test__span__apply__nests_subspans_recursively():
 
-    f = Flux( 'the cat sat on the mat.' )
+    text = '0123456789abcdef0123456789abcdef'
 
-    def on_nonword( x ):
-        return x == ' ' or x == '.'
+    span = Span( 2, 31 )
 
-    result = f.split( on_nonword ).items()
+    assert '23456789abcdef0123456789abcde' == span.apply( text )
 
-    assert [ 'the', ' ', 'cat', ' ', 'sat', ' ',
-             'on', ' ', 'the', ' ', 'mat', '.' ]
+    ( left, right ) = span.excise( 10, 17 )
+
+    assert '23456789' == left.apply( text )
+    assert '0123456789abcde' == right.apply( text )
+
+    span.stratify( left, right )
+
+    result = span.apply( text )
+
+    assert [ '23456789', '0123456789abcde' ] == result
 
 
 def test__usecase__sentence_tokenize():
@@ -129,32 +96,10 @@ It was the last day for them!
 
 An ancient era was passing in fiery holocaust!"""
 
-    char_level = Flux( raw )
+    def sentence_end( x ):
+        return x in '.?!'
 
-    char_level.wind( lower )
-    char_level.wind( remove( '\n' ) )
+    def word_end( x ):
+        return x in ' \n,'
 
-    assert ( 'there came a time when the old gods died! the' ==
-             char_level[ 0 : 46 ] )
-
-    nonalpha = re.compile( '[^A-Za-z]' )
-    def on_nonalpha( x ):
-        return nonalpha.match( x )
-
-    word_level = char_level.split( on_nonalpha )
-
-    assert ( [ 'there', ' ', 'came', ' ', 'a', ' ', 'time', ' ',
-               'when', ' ', 'the', ' ', 'old', ' ', 'gods', ' ',
-               'died', '!', ' ', 'the' ] == word_level[ 0 : 20 ] )
-
-    def on_sentence( x ):
-        return x in '.!?'
-
-    sentence_level = word_level.split( on_sentence )
-
-    assert [ 'there', ' ', 'came', ' ', 'a', ' ', 'time', ' ',
-             'when', ' ', 'the', ' ', 'old', ' ', 'gods', ' ',
-             'died' ] == sentence_level[ 0 ]
-
-    assert [ '!' ] == sentence_level[ 1 ]
-    assert 10 == len( sentence_level )
+    flow = Flux( splits=( sentence_end, word_end ) )
