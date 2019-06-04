@@ -86,6 +86,22 @@ def test__span__apply__nests_subspans_recursively():
     assert [ '23456789', '0123456789abcde' ] == result
 
 
+def test__flux__tokenizes_at_single_level():
+
+    raw = 'There came a time when the old gods died!'
+
+    def word_end( x ):
+        return x in ' \n,!'
+
+    flux = Flux( splits=( word_end, ) )
+
+    result = flux.apply( raw )
+
+    first = [ 'There', 'came', 'a', 'time',
+              'when', 'the', 'old', 'gods', 'died' ]
+
+    assert first == result[ 0 ]
+
 def test__usecase__sentence_tokenize():
 
     raw = """There came a time when the old gods died! 
@@ -103,3 +119,8 @@ An ancient era was passing in fiery holocaust!"""
         return x in ' \n,'
 
     flow = Flux( splits=( sentence_end, word_end ) )
+
+    result = flow.apply( raw )
+
+    first = [ 'There', 'came', 'a', 'time',
+              'when', 'the', 'old', 'gods', 'died' ]

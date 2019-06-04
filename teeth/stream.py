@@ -73,115 +73,39 @@ class Flux:
 
         self.splits = splits or []
 
+
     def apply( self, data ):
 
-        tokens = data
-        for split in self.splits:
-            prev = 0
-            new = []
-            for ( index, x ) in enumerate( tokens ):
-                if split( x ):
-                    new.append( Span( prev, index ) )
-                    prev = index
+        start = 0
 
-            tokens = new
+        p = self.splits[ 0 ]
 
-        return tokens
+        layers = []
+        for p in self.splits:
 
+            prev = p( data[ 0 ] )
+            spans = []
+            for ( end, item ) in enumerate( data ):
 
-class __Flux:
+                nxt = p( item )
+                if prev and not nxt:
+                    start = end
 
-    def __init__( self, data, *args, **kwargs ):
+                if nxt and not prev:
+                    spans.append( Span( start, end ) )
+                    start = end
 
-        self.data = data
-        self.steps = []
+                prev = nxt
 
-
-    def __len__( self ):
-        return len( self.data )
-
-    def __getitem__( self, s ):
-
-        d = self.data[ s ]
-        s = list( self._makeiter( d ) )
-
-        if isinstance( d, str ):
-            return str.join( '',  s)
-        else:
-            return s
-
-
-    def __iter__( self ):
-        return self._makeiter( self.data )
-
-
-    def _makeiter( self, data ):
-
-        _iter = iter( data )
-
-        while True:
-            try:
-                _next = next( _iter )
-            except StopIteration:
-                break
-
-            for f in self.steps:
-                _next = f( _next )
-
-            yield _next
-
-        return
-
-    def items( self ):
-        return [ x for x in iter( self ) ]
-
-    def compare( self, sl ):
-        return( self.data[ sl ], self[ sl ] )
-
-    def asbytestring( self, sl ):
-
-        def _asbytes( s ):
-            return ( ':'.join( '{:02x}'.format( ord( c ) )
-                               for c in s ) )
-
-        if isinstance( self.data, str ):
-            return _asbytes( self.data[ sl ] )
-        else:
-            return [ [ _asbytes( c ) for c in x ]
-                     for x in self.data[ sl ] ]
-
-
-    def wind( self, f ):
-        self.steps.append( f )
-
-    def unwind( self ):
-        self.steps.pop()
-
-    def split( self, p ):
+            layers.append( spans )
 
         result = []
-        token = []
+        for l in layers:
+            for s in self.splits:
+                nxt = []
+                for span in spans:
+                    nxt.append( span.apply( data ) )
 
-        for x in iter( self ):
+                result.append( nxt )
 
-            if not p( x ):
-                token.append( x )
-                continue
-
-            if 0 < len( token ):
-                result.append( token )
-                token = []
-
-            result.append( [ x ] )
-
-
-        if 0 < len( token ):
-            result.append( token )
-
-        def join( x ):
-            return str.join( '', x )
-
-        if isinstance( self.data, str ):
-            return Flux( list( map( join, result ) ) )
-
-        return Flux( result )
+        return result
