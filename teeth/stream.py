@@ -67,45 +67,96 @@ class Span:
 
         return result
 
+class PredCursor:
+
+    def __init__( self, predicate, data ):
+        self.predicate = predicate
+        self.data = data
+        self._len = len( data )
+
+        self.index = 0
+        self.token = None
+
+
+    def __iter__( self ):
+
+        for ix in range( 0, self._len ):
+
+            token = self.data[ ix ]
+            if self.predicate( token ):
+                self.index = ix
+                self.token = self.data[ ix ]
+                yield ( ix, token )
+
 class Flux:
 
-    def __init__( self, splits=None ):
+    def __init__( self, data, splits=None ):
 
         self.splits = splits or []
+        self.data = data
+
+        self._cursors = None
+        self._rewind()
 
 
-    def apply( self, data ):
+    def _rewind( self ):
+        self._cursors = [ PredCursor( s, self.data )
+                          for s in self.splits ]
 
-        start = 0
 
-        p = self.splits[ 0 ]
+    def __iter__( self ):
 
-        layers = []
-        for p in self.splits:
+        if self._cursors is None or 0 == len( self._cursors ):
+            return
 
-            prev = p( data[ 0 ] )
-            spans = []
-            for ( end, item ) in enumerate( data ):
+        cursors = [ iter( c ) for c in self._cursors ]
+        outer = cursors[ -1 ]
 
-                nxt = p( item )
-                if prev and not nxt:
-                    start = end
+        prev_limit = -1
+        while True:
 
-                if nxt and not prev:
-                    spans.append( Span( start, end ) )
-                    start = end
+            try:
+                limit, _ = next( outer )
+            except StopIteration:
+                break
 
-                prev = nxt
+            if limit == prev_limit + 1:
+                prev_limit = limit
+                continue
 
-            layers.append( spans )
+            span = Span( prev_limit + 1, limit )
 
-        result = []
-        for l in layers:
-            for s in self.splits:
-                nxt = []
-                for span in spans:
-                    nxt.append( span.apply( data ) )
+            layers = []
+            sublayers = cursors[ 0 : len( self.splits ) - 1 ]
+            for ( ix, c ) in enumerate( sublayers ):
 
-                result.append( nxt )
+                layer = []
 
-        return result
+                pos = self._cursors[ ix ].index
+                while pos < limit:
+                    layer.append( pos )
+                    pos, _ = next( c )
+
+                layer.append( limit )
+
+                subspans = [
+                    Span( start + 1, end ) for ( start, end )
+                    in zip( layer[ 1 : -1 ], layer[ 2 : ] )
+                    if start + 1 < end
+                ]
+
+                if prev_limit < layer[ 0 ]:
+                    first_token = Span( layer[ 0 ], layer[ 1 ] )
+                    subspans.insert( 0, first_token )
+
+                if layer[ -1 ] < limit:
+                    subspans.append( Span( layer[ -1 ], limit ) )
+
+                layers.append( subspans )
+
+            if 0 < len( layers ):
+                span.stratify( *( layers[ 0 ] ) )
+
+            yield ( span.apply( self.data ), span )
+
+            prev_limit = limit
