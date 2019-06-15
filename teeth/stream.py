@@ -105,7 +105,8 @@ class RegexCursor:
         try:
             while True:
                 token = next( match )
-                yield Span( *( token.span() ) )
+                span = Span( *( token.span() ) )
+                yield ( span, span.apply( self.data ) )
 
         except StopIteration:
             pass
@@ -129,28 +130,9 @@ class Flux:
     def __iter__( self ):
 
         outer = self._cursors[ 0 ]
-
-        try:
-            separator = next( outer )
-
-        except StopIteration:
-            return
-
-        if 0 < separator.start:
-            start_index = 0
-
-        else:
-            start_index = separator.stop
-
         try:
             while True:
-
-                separator = next( outer )
-
-                span = Span( start_index, separator.start )
-                yield span
-
-                start_index = separator.stop
+                yield next( outer )
 
         except StopIteration:
             return

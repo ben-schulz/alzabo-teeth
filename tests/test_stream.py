@@ -97,10 +97,10 @@ def test__regexcursor__iterates_over_matches():
     cursor = RegexCursor( pattern, text )
     token = iter( cursor )
 
-    assert '. ' == next( token ).apply( text )
-    assert '! ' == next( token ).apply( text )
-    assert ' ... ? ' == next( token ).apply( text )
-    assert '.' == next( token ).apply( text )
+    assert '. ' == next( token )[ 1 ]
+    assert '! ' == next( token )[ 1 ]
+    assert ' ... ? ' == next( token )[ 1 ]
+    assert '.' == next( token )[ 1 ]
 
     try:
         next( token )
@@ -114,14 +114,14 @@ def test__flux__tokenizes_at_single_level():
 
     raw = ' There came a time when the old gods died!'
 
-    word_end = '[^a-zA-Z0-9]+'
+    word_pattern = '[^ \t\n,.?!]+'
 
-    flux = Flux( raw, splits=( word_end, ) )
+    flux = Flux( raw, splits=( word_pattern, ) )
 
     words = [ 'There', 'came', 'a', 'time',
               'when', 'the', 'old', 'gods', 'died' ]
 
-    assert words == [ s.apply( raw ) for s in iter( flux ) ]
+    assert words == [ token for ( _, token ) in iter( flux ) ]
 
 
 def test__usecase__sentence_tokenize():
