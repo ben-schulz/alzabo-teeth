@@ -1,3 +1,5 @@
+import re
+
 class Span:
 
     def __init__( self, start, end ):
@@ -88,6 +90,26 @@ class PredCursor:
                 self.token = self.data[ ix ]
                 yield ( ix, token )
 
+class RegexCursor:
+
+    def __init__( self, pattern, data ):
+
+        self.pattern = pattern
+        self._regex = re.compile( self.pattern )
+        self.data = data
+
+    def __iter__( self ):
+
+        match = self._regex.finditer( self.data )
+
+        try:
+            while True:
+                token = next( match )
+                yield Span( *( token.span() ) )
+
+        except StopIteration:
+            pass
+
 class Flux:
 
     def __init__( self, data, splits=None ):
@@ -100,11 +122,42 @@ class Flux:
 
 
     def _rewind( self ):
-        self._cursors = [ PredCursor( s, self.data )
-                          for s in self.splits ]
+        self._cursors = [ iter( RegexCursor( s, self.data ) )
+                                for s in self.splits ]
 
 
     def __iter__( self ):
+
+        outer = self._cursors[ 0 ]
+
+        try:
+            separator = next( outer )
+
+        except StopIteration:
+            return
+
+        if 0 < separator.start:
+            start_index = 0
+
+        else:
+            start_index = separator.stop
+
+        try:
+            while True:
+
+                separator = next( outer )
+
+                span = Span( start_index, separator.start )
+                yield span
+
+                start_index = separator.stop
+
+        except StopIteration:
+            return
+
+
+
+    def __nope__( self ):
 
         if self._cursors is None or 0 == len( self._cursors ):
             return

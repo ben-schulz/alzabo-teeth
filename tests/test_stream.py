@@ -1,4 +1,6 @@
-from teeth.stream import Span, Flux
+import re
+
+from teeth.stream import Span, Flux, RegexCursor
 
 def test__span__splits_at_single_index():
 
@@ -86,19 +88,40 @@ def test__span__apply__nests_subspans_recursively():
     assert [ '23456789', '0123456789abcde' ] == result
 
 
+def test__regexcursor__iterates_over_matches():
+
+    text = 'ok wow. yes! is that it ... ? ok.'
+
+    pattern = '[\n ]*[.?!]+[^a-zA-Z0-9]*'
+
+    cursor = RegexCursor( pattern, text )
+    token = iter( cursor )
+
+    assert '. ' == next( token ).apply( text )
+    assert '! ' == next( token ).apply( text )
+    assert ' ... ? ' == next( token ).apply( text )
+    assert '.' == next( token ).apply( text )
+
+    try:
+        next( token )
+        raise AssertionError( 'expected \'StopIteration\' raised.' )
+
+    except StopIteration:
+        pass
+
+
 def test__flux__tokenizes_at_single_level():
 
     raw = ' There came a time when the old gods died!'
 
-    def word_end( x ):
-        return x in ' \n,!'
+    word_end = '[^a-zA-Z0-9]+'
 
     flux = Flux( raw, splits=( word_end, ) )
 
-    first = [ 'There', 'came', 'a', 'time',
+    words = [ 'There', 'came', 'a', 'time',
               'when', 'the', 'old', 'gods', 'died' ]
 
-    assert first == [ token for ( token, _ ) in iter( flux ) ]
+    assert words == [ s.apply( raw ) for s in iter( flux ) ]
 
 
 def test__usecase__sentence_tokenize():
@@ -111,16 +134,27 @@ It was the last day for them!
 
 An ancient era was passing in fiery holocaust!"""
 
+    sentence_end_pattern = re.compile( '[ ]*[.?!][ ]*' )
+
     def sentence_end( x ):
         return x in '.?!'
 
     def word_end( x ):
         return x in ' \n,'
 
+
+    """
     flow = iter( Flux( raw, splits=( word_end, sentence_end ) ) )
 
     first = [ 'There', 'came', 'a', 'time',
               'when', 'the', 'old', 'gods', 'died' ]
 
-    result, span = next( flow )
-    assert first == result
+    first_result, span = next( flow )
+    assert first == first_result
+
+    second = [ 'The', 'brave', 'died', 'with', 'the', 'cunning' ]
+
+    second_result, span = next( flow )
+    print( second_result )
+    assert second == second_result
+    """
