@@ -97,6 +97,7 @@ class RegexCursor:
         self.pattern = pattern
         self._regex = re.compile( self.pattern )
         self.data = data
+        self.position = -1
 
     def __iter__( self ):
 
@@ -106,7 +107,8 @@ class RegexCursor:
             while True:
                 token = next( match )
                 span = Span( *( token.span() ) )
-                yield ( span, span.apply( self.data ) )
+                self.position = span.stop
+                yield span
 
         except StopIteration:
             pass
@@ -123,75 +125,38 @@ class Flux:
 
 
     def _rewind( self ):
-        self._cursors = [ iter( RegexCursor( s, self.data ) )
-                                for s in self.splits ]
+        self._cursors = [ RegexCursor( s, self.data )
+                          for s in self.splits ]
 
 
     def __iter__( self ):
 
-        outer = self._cursors[ 0 ]
+        cursors = [ iter( c ) for c in self._cursors ]
+        outer = cursors[ 0 ]
+
         try:
             while True:
-                yield next( outer )
+                outer_token = next( outer )
+
+                strata = []
+                for ( layer, c ) in enumerate( cursors[ 1 : ] ):
+
+                    subtokens = []
+
+                    cursor = self._cursors[ layer + 1 ]
+                    try:
+                        while cursor.position < outer_token.stop:
+                            subtokens.append( next( c ) )
+
+                    except StopIteration:
+                        pass
+
+                    strata.append( subtokens )
+
+                if 0 < len( strata ):
+                    outer_token.stratify( *( strata[ 0 ] ) )
+
+                yield outer_token
 
         except StopIteration:
             return
-
-
-
-    def __nope__( self ):
-
-        if self._cursors is None or 0 == len( self._cursors ):
-            return
-
-        cursors = [ iter( c ) for c in self._cursors ]
-        outer = cursors[ -1 ]
-
-        prev_limit = -1
-        while True:
-
-            try:
-                limit, _ = next( outer )
-            except StopIteration:
-                break
-
-            if limit == prev_limit + 1:
-                prev_limit = limit
-                continue
-
-            span = Span( prev_limit + 1, limit )
-
-            layers = []
-            sublayers = cursors[ 0 : len( self.splits ) - 1 ]
-            for ( ix, c ) in enumerate( sublayers ):
-
-                layer = []
-
-                pos = self._cursors[ ix ].index
-                while pos < limit:
-                    layer.append( pos )
-                    pos, _ = next( c )
-
-                layer.append( limit )
-
-                subspans = [
-                    Span( start + 1, end ) for ( start, end )
-                    in zip( layer[ 1 : -1 ], layer[ 2 : ] )
-                    if start + 1 < end
-                ]
-
-                if prev_limit < layer[ 0 ]:
-                    first_token = Span( layer[ 0 ], layer[ 1 ] )
-                    subspans.insert( 0, first_token )
-
-                if layer[ -1 ] < limit:
-                    subspans.append( Span( layer[ -1 ], limit ) )
-
-                layers.append( subspans )
-
-            if 0 < len( layers ):
-                span.stratify( *( layers[ 0 ] ) )
-
-            yield ( span.apply( self.data ), span )
-
-            prev_limit = limit

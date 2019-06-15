@@ -97,10 +97,10 @@ def test__regexcursor__iterates_over_matches():
     cursor = RegexCursor( pattern, text )
     token = iter( cursor )
 
-    assert '. ' == next( token )[ 1 ]
-    assert '! ' == next( token )[ 1 ]
-    assert ' ... ? ' == next( token )[ 1 ]
-    assert '.' == next( token )[ 1 ]
+    assert '. ' == next( token ).apply( text )
+    assert '! ' == next( token ).apply( text )
+    assert ' ... ? ' == next( token ).apply( text )
+    assert '.' == next( token ).apply( text )
 
     try:
         next( token )
@@ -121,7 +121,7 @@ def test__flux__tokenizes_at_single_level():
     words = [ 'There', 'came', 'a', 'time',
               'when', 'the', 'old', 'gods', 'died' ]
 
-    assert words == [ token for ( _, token ) in iter( flux ) ]
+    assert words == [ s.apply( raw ) for s in iter( flux ) ]
 
 
 def test__usecase__sentence_tokenize():
@@ -136,25 +136,25 @@ An ancient era was passing in fiery holocaust!"""
 
     sentence_end_pattern = re.compile( '[ ]*[.?!][ ]*' )
 
-    def sentence_end( x ):
-        return x in '.?!'
+    sentence_pattern = '[^.?!]+'
+    word_pattern = '[^ \n\t.?!,]+'
 
-    def word_end( x ):
-        return x in ' \n,'
-
-
-    """
-    flow = iter( Flux( raw, splits=( word_end, sentence_end ) ) )
+    flow = iter( Flux( raw,
+                       splits=( sentence_pattern, word_pattern ) ) )
 
     first = [ 'There', 'came', 'a', 'time',
               'when', 'the', 'old', 'gods', 'died' ]
 
-    first_result, span = next( flow )
+    first_result = next( flow ).apply( raw )
     assert first == first_result
 
     second = [ 'The', 'brave', 'died', 'with', 'the', 'cunning' ]
 
-    second_result, span = next( flow )
-    print( second_result )
+    second_result = next( flow ).apply( raw )
     assert second == second_result
-    """
+
+    third = [ 'The', 'noble', 'perished',
+              'locked', 'in', 'battle', 'with', 'unleashed', 'evil' ]
+
+    third_result = next( flow ).apply( raw )
+    assert third == third_result
