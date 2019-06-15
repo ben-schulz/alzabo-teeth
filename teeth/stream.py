@@ -69,26 +69,6 @@ class Span:
 
         return result
 
-class PredCursor:
-
-    def __init__( self, predicate, data ):
-        self.predicate = predicate
-        self.data = data
-        self._len = len( data )
-
-        self.index = 0
-        self.token = None
-
-
-    def __iter__( self ):
-
-        for ix in range( 0, self._len ):
-
-            token = self.data[ ix ]
-            if self.predicate( token ):
-                self.index = ix
-                self.token = self.data[ ix ]
-                yield ( ix, token )
 
 class RegexCursor:
 
