@@ -44,7 +44,11 @@ class Span:
                  Span( resume - 1, self.stop ) )
 
 
-    def stratify( self, *subspans, relative=False ):
+    def stratify( self, subspans, relative=False ):
+
+        if not hasattr( subspans, '__iter__' ):
+            raise TypeError( 'first argument to \'self.stratify\''
+                             ' must be iterable.' )
 
         if not relative:
             self.subspans = [
@@ -134,9 +138,9 @@ class Flux:
                     strata.append( subtokens )
 
                 if 0 < len( strata ):
-                    outer_token.stratify( *( strata[ 0 ] ) )
+                    outer_token.stratify( strata[ 0 ] )
 
-                yield outer_token
+                yield ( outer_token.apply( self.data ), outer_token )
 
         except StopIteration:
             return

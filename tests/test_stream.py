@@ -53,7 +53,8 @@ def test__span__apply__nests_subspans_in_result():
 
     span = Span( 7, 15 )
 
-    span.stratify( Span( 1, 3 ), Span( 4, 7 ), relative=True )
+    subspans = [ Span( 1, 3 ), Span( 4, 7 ) ]
+    span.stratify( subspans, relative=True )
 
     result = span.apply( text )
 
@@ -61,7 +62,8 @@ def test__span__apply__nests_subspans_in_result():
 
     span = Span( 7, 15 )
 
-    span.stratify( Span( 8, 10 ), Span( 11, 14 ), relative=False )
+    subspans = [ Span( 8, 10 ), Span( 11, 14 ) ]
+    span.stratify( subspans, relative=False )
 
     result = span.apply( text )
 
@@ -81,7 +83,7 @@ def test__span__apply__nests_subspans_recursively():
     assert '23456789' == left.apply( text )
     assert '0123456789abcde' == right.apply( text )
 
-    span.stratify( left, right )
+    span.stratify( [ left, right ] )
 
     result = span.apply( text )
 
@@ -121,7 +123,7 @@ def test__flux__tokenizes_at_single_level():
     words = [ 'There', 'came', 'a', 'time',
               'when', 'the', 'old', 'gods', 'died' ]
 
-    assert words == [ s.apply( raw ) for s in iter( flux ) ]
+    assert words == [ w for ( w, _ ) in iter( flux ) ]
 
 
 def test__usecase__sentence_tokenize():
@@ -145,16 +147,16 @@ An ancient era was passing in fiery holocaust!"""
     first = [ 'There', 'came', 'a', 'time',
               'when', 'the', 'old', 'gods', 'died' ]
 
-    first_result = next( flow ).apply( raw )
+    first_result, _ = next( flow )
     assert first == first_result
 
     second = [ 'The', 'brave', 'died', 'with', 'the', 'cunning' ]
 
-    second_result = next( flow ).apply( raw )
+    second_result, _ = next( flow )
     assert second == second_result
 
     third = [ 'The', 'noble', 'perished',
               'locked', 'in', 'battle', 'with', 'unleashed', 'evil' ]
 
-    third_result = next( flow ).apply( raw )
+    third_result, _ = next( flow )
     assert third == third_result
