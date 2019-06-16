@@ -118,7 +118,7 @@ def test__flux__tokenizes_at_single_level():
 
     word_pattern = '[^ \t\n,.?!]+'
 
-    flux = Flux( raw, splits=( word_pattern, ) )
+    flux = Flux( raw, word_pattern )
 
     words = [ 'There', 'came', 'a', 'time',
               'when', 'the', 'old', 'gods', 'died' ]
@@ -142,7 +142,7 @@ An ancient era was passing in fiery holocaust!"""
     word_pattern = '[^ \n\t.?!,]+'
 
     flow = iter( Flux( raw,
-                       splits=( sentence_pattern, word_pattern ) ) )
+                       sentence_pattern, inner_pattern=word_pattern ) )
 
     first = [ 'There', 'came', 'a', 'time',
               'when', 'the', 'old', 'gods', 'died' ]

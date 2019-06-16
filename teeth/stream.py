@@ -99,9 +99,21 @@ class RegexCursor:
 
 class Flux:
 
-    def __init__( self, data, splits=None ):
+    def __init__( self, data, outer_pattern, inner_pattern=None ):
 
-        self.splits = splits or []
+        if not isinstance( outer_pattern, str ):
+            raise TypeError( '\'Flux\' expects type \'str\' in '
+                             'second argument.' )
+
+        if ( inner_pattern is not None
+             and not isinstance( inner_pattern, str ) ):
+
+             raise TypeError( '\'Flux\' expects type \'str\' in '
+                              'kwarg \'inner_pattern\'.' )
+
+        self.splits = tuple( x for x in ( outer_pattern, inner_pattern )
+                        if x is not None )
+
         self.data = data
 
         self._cursors = None
@@ -113,34 +125,58 @@ class Flux:
                           for s in self.splits ]
 
 
+    def outerpos( self ):
+        return self._cursors[ 0 ].position
+
+    def innerpos( self ):
+
+        if 1 < len( self.splits ):
+            return self._cursors[ 1 ].position
+
+        return None
+
+
     def __iter__( self ):
 
         cursors = [ iter( c ) for c in self._cursors ]
         outer = cursors[ 0 ]
 
+        if 1 < len( cursors ):
+            inner = cursors[ 1 ]
+        else:
+            inner = None
+
         try:
-            while True:
-                outer_token = next( outer )
+            if inner is None:
 
-                strata = []
-                for ( layer, c ) in enumerate( cursors[ 1 : ] ):
+                while True:
+                    outer_token = next( outer )
+                    token = ( outer_token.apply( self.data ),
+                            outer_token )
 
+                    yield token
+
+            else:
+
+                while True:
+
+                    outer_token = next( outer )
                     subtokens = []
 
-                    cursor = self._cursors[ layer + 1 ]
                     try:
-                        while cursor.position < outer_token.stop:
-                            subtokens.append( next( c ) )
+                        while self.innerpos() < outer_token.stop:
+                            subtokens.append( next( inner ) )
 
                     except StopIteration:
                         pass
 
-                    strata.append( subtokens )
+                    if subtokens:
+                        outer_token.stratify( subtokens )
 
-                if 0 < len( strata ):
-                    outer_token.stratify( strata[ 0 ] )
+                    token = ( outer_token.apply( self.data ),
+                              outer_token )
 
-                yield ( outer_token.apply( self.data ), outer_token )
+                    yield token
 
         except StopIteration:
             return
