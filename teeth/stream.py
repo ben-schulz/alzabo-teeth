@@ -142,13 +142,6 @@ class Flux:
 
     def __iter__( self ):
 
-        cursors = [ iter( c ) for c in self._cursors ]
-        outer = cursors[ 0 ]
-
-        if 1 < len( cursors ):
-            inner = cursors[ 1 ]
-        else:
-            inner = None
 
         def _iterate_inner( outer_token ):
 
@@ -166,8 +159,12 @@ class Flux:
             return ( outer_token.apply( self.data ),
                      outer_token )
 
+
+        cursors = [ iter( c ) for c in self._cursors ]
+        outer = cursors[ 0 ]
+
         try:
-            if inner is None:
+            if 2 > len( cursors ):
 
                 while True:
                     outer_token = next( outer )
@@ -178,6 +175,7 @@ class Flux:
 
             else:
 
+                inner = cursors[ 1 ]
                 while True:
                     outer_token = next( outer )
                     token = _iterate_inner( outer_token )
