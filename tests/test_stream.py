@@ -112,6 +112,33 @@ def test__regexcursor__iterates_over_matches():
         pass
 
 
+def test__regexcursor__optionally_keeps_separators():
+
+    text = 'ok wow. yes! is that it ... ? ok.'
+
+    pattern = '[\n ]*[.?!]+[^a-zA-Z0-9]*'
+
+    cursor = RegexCursor( pattern, text, keep_separators=True )
+    token = iter( cursor )
+
+    assert 'ok wow' == next( token ).apply( text )
+    assert '. ' == next( token ).apply( text )
+    assert 'yes' == next( token ).apply( text )
+    assert '! ' == next( token ).apply( text )
+    assert 'is that it' == next( token ).apply( text )
+    assert ' ... ? ' == next( token ).apply( text )
+    assert 'ok' == next( token ).apply( text )
+    assert '.' == next( token ).apply( text )
+
+    try:
+        next( token )
+        raise AssertionError( 'expected \'StopIteration\' raised.' )
+
+    except StopIteration:
+        pass
+
+
+
 def test__flux__tokenizes_at_simplex_level():
 
     raw = ' There came a time when the old gods died!'
@@ -178,12 +205,15 @@ An ancient era was passing in fiery holocaust!"""
     word_pattern = '[^ \n\t.?!,]+'
 
     flow = iter( Flux( raw,
-                       sentence_pattern, inner_pattern=word_pattern ) )
+                       sentence_pattern, inner_pattern=word_pattern,
+                       keep_separators=True ) )
 
-    """
+
     first = [ 'There', ' ', 'came', ' ', 'a', ' ', 'time',
               ' ' , 'when', ' ' , 'the', ' ' , 'old', ' ', 'gods', 'died', '! ' ]
 
+
+    """
     first_result, _ = next( flow )
     assert first == first_result
 

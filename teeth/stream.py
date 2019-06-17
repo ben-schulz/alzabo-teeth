@@ -76,26 +76,43 @@ class Span:
 
 class RegexCursor:
 
-    def __init__( self, pattern, data ):
+    def __init__( self, pattern, data, keep_separators=False ):
 
         self.pattern = pattern
         self._regex = re.compile( self.pattern )
         self.data = data
+        self.length = len( self.data )
         self.position = -1
+
+        self.keep_separators = keep_separators
+
 
     def __iter__( self ):
 
         match = self._regex.finditer( self.data )
 
         try:
+            token = next( match )
+            span = Span( *( token.span() ) )
+
+            if self.keep_separators:
+                yield Span( 0, span.start )
+
             while True:
-                token = next( match )
-                span = Span( *( token.span() ) )
+
                 self.position = span.stop
                 yield span
 
+                token = next( match )
+                span = Span( *( token.span() ) )
+
+                if self.keep_separators:
+                    yield Span( self.position, span.start )
+
         except StopIteration:
-            pass
+
+            if self.position < self.length - 1 and self.keep_separators:
+                yield Span( self.position, self.length )
 
 class Flux:
 
