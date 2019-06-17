@@ -112,7 +112,7 @@ def test__regexcursor__iterates_over_matches():
         pass
 
 
-def test__flux__tokenizes_at_single_level():
+def test__flux__tokenizes_at_simplex_level():
 
     raw = ' There came a time when the old gods died!'
 
@@ -126,7 +126,7 @@ def test__flux__tokenizes_at_single_level():
     assert words == [ w for ( w, _ ) in iter( flux ) ]
 
 
-def test__usecase__sentence_tokenize():
+def test__flux__tokenizes_at_duplex_level():
 
     raw = """There came a time when the old gods died! 
 The brave died with the cunning! The noble perished,
@@ -160,3 +160,41 @@ An ancient era was passing in fiery holocaust!"""
 
     third_result, _ = next( flow )
     assert third == third_result
+
+
+def test__flux__tokenizes_with_separators_duplex_level():
+
+    raw = """There came a time when the old gods died!
+The brave died with the cunning! The noble perished,
+locked in battle with unleashed evil!
+
+It was the last day for them!
+
+An ancient era was passing in fiery holocaust!"""
+
+    sentence_end_pattern = re.compile( '[ ]*[.?!][ ]*' )
+
+    sentence_pattern = '[^.?!]+[ ]*'
+    word_pattern = '[^ \n\t.?!,]+'
+
+    flow = iter( Flux( raw,
+                       sentence_pattern, inner_pattern=word_pattern ) )
+
+    """
+    first = [ 'There', ' ', 'came', ' ', 'a', ' ', 'time',
+              ' ' , 'when', ' ' , 'the', ' ' , 'old', ' ', 'gods', 'died', '! ' ]
+
+    first_result, _ = next( flow )
+    assert first == first_result
+
+    second = [ 'The', 'brave', 'died', 'with', 'the', 'cunning' ]
+
+    second_result, _ = next( flow )
+    assert second == second_result
+
+    third = [ 'The', 'noble', 'perished',
+              'locked', 'in', 'battle', 'with', 'unleashed', 'evil' ]
+
+    third_result, _ = next( flow )
+    assert third == third_result
+    """

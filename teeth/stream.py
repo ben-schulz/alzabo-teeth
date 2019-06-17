@@ -99,7 +99,10 @@ class RegexCursor:
 
 class Flux:
 
-    def __init__( self, data, outer_pattern, inner_pattern=None ):
+    def __init__( self, data, outer_pattern,
+                  inner_pattern=None,
+                  keep_separators=False
+    ):
 
         if not isinstance( outer_pattern, str ):
             raise TypeError( '\'Flux\' expects type \'str\' in '
@@ -115,6 +118,7 @@ class Flux:
                         if x is not None )
 
         self.data = data
+        self.keep_separators = keep_separators
 
         self._cursors = None
         self._rewind()
@@ -146,6 +150,22 @@ class Flux:
         else:
             inner = None
 
+        def _iterate_inner( outer_token ):
+
+            subtokens = []
+            try:
+                while self.innerpos() < outer_token.stop:
+                    subtokens.append( next( inner ) )
+
+            except StopIteration:
+                pass
+
+            if subtokens:
+                outer_token.stratify( subtokens )
+
+            return ( outer_token.apply( self.data ),
+                     outer_token )
+
         try:
             if inner is None:
 
@@ -159,23 +179,8 @@ class Flux:
             else:
 
                 while True:
-
                     outer_token = next( outer )
-                    subtokens = []
-
-                    try:
-                        while self.innerpos() < outer_token.stop:
-                            subtokens.append( next( inner ) )
-
-                    except StopIteration:
-                        pass
-
-                    if subtokens:
-                        outer_token.stratify( subtokens )
-
-                    token = ( outer_token.apply( self.data ),
-                              outer_token )
-
+                    token = _iterate_inner( outer_token )
                     yield token
 
         except StopIteration:
