@@ -95,7 +95,7 @@ class RegexCursor:
             token = next( match )
             span = Span( *( token.span() ) )
 
-            if self.keep_separators:
+            if self.keep_separators and 0 < span.start:
                 yield Span( 0, span.start )
 
             while True:
@@ -111,7 +111,7 @@ class RegexCursor:
 
         except StopIteration:
 
-            if self.position < self.length - 1 and self.keep_separators:
+            if self.keep_separators and self.position < self.length - 1:
                 yield Span( self.position, self.length )
 
 class Flux:
