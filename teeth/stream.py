@@ -116,10 +116,7 @@ class RegexCursor:
 
 class Flux:
 
-    def __init__( self, data, outer_pattern,
-                  inner_pattern=None,
-                  keep_separators=False
-    ):
+    def __init__( self, data, outer_pattern, inner_pattern=None ):
 
         if not isinstance( outer_pattern, str ):
             raise TypeError( '\'Flux\' expects type \'str\' in '
@@ -135,7 +132,6 @@ class Flux:
                         if x is not None )
 
         self.data = data
-        self.keep_separators = keep_separators
 
         self._cursors = None
         self._rewind()
