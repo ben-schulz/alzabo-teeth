@@ -1,6 +1,6 @@
 import re
 
-from teeth.stream import Span, Flux, RegexCursor
+from teeth.stream import Span, Flux, RegexCursor, stratify
 
 def test__span__splits_at_single_index():
 
@@ -138,6 +138,49 @@ def test__regexcursor__optionally_keeps_separators():
         pass
 
 
+def test__stratify__creates_tree_from_two_iterables():
+
+    text = """There came a time when the old gods died!
+The brave died with the cunning! The noble perished,
+locked in battle with unleashed evil!
+
+It was the last day for them!
+
+An ancient era was passing in fiery holocaust!"""
+
+    word_pattern = '[a-zA-Z]+'
+    word_splits = [ span for span in
+                    RegexCursor( word_pattern, text ) ]
+
+    sentence_pattern = '[^.?!]+'
+    sentence_splits = [ span for span in
+                        RegexCursor( sentence_pattern, text ) ]
+
+    flow = stratify( sentence_splits, word_splits )
+
+    first = [ 'There', 'came', 'a', 'time',
+              'when', 'the', 'old', 'gods', 'died' ]
+    first_result = [ s.apply( text ) for s in flow[ 0 ] ]
+    assert first == first_result
+
+    second = [ 'The', 'brave', 'died', 'with', 'the', 'cunning' ]
+    second_result = [ s.apply( text ) for s in flow[ 1 ] ]
+    assert second == second_result
+
+    third = [ 'The', 'noble', 'perished',
+              'locked', 'in', 'battle', 'with', 'unleashed', 'evil' ]
+    third_result = [ s.apply( text ) for s in flow[ 2 ] ]
+    assert third == third_result
+
+    fourth = [ 'It', 'was', 'the', 'last', 'day', 'for', 'them' ]
+    fourth_result = [ s.apply( text ) for s in flow[ 3 ] ]
+    assert fourth == fourth_result
+
+    fifth = [ 'An', 'ancient', 'era', 'was',
+              'passing', 'in', 'fiery', 'holocaust' ]
+    fifth_result = [ s.apply( text ) for s in flow[ 4 ] ]
+    assert fifth == fifth_result
+
 
 def test__flux__tokenizes_at_simplex_level():
 
@@ -155,11 +198,11 @@ def test__flux__tokenizes_at_simplex_level():
 
 def test__flux__tokenizes_at_duplex_level():
 
-    raw = """There came a time when the old gods died! 
+    raw = """There came a time when the old gods died!
 The brave died with the cunning! The noble perished,
 locked in battle with unleashed evil!
 
-It was the last day for them! 
+It was the last day for them!
 
 An ancient era was passing in fiery holocaust!"""
 

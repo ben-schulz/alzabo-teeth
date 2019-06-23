@@ -74,6 +74,34 @@ class Span:
         return result
 
 
+def stratify( outer, inner ):
+
+    tokens = []
+    token = []
+
+    try:
+
+        inner_item = iter( inner )
+        inner_token = next( inner_item )
+
+        for outer_token in outer:
+
+            while inner_token.start < outer_token.stop:
+
+                token.append( inner_token )
+                inner_token = next( inner_item )
+
+            tokens.append( token )
+            token = []
+
+    except StopIteration:
+
+        if token:
+            tokens.append( token )
+
+    return tokens
+
+
 class RegexCursor:
 
     def __init__( self, pattern, data, keep_separators=False ):
